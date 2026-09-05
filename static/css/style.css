@@ -34,6 +34,9 @@ h1, .brand {
 
 .site-header {
     background-color: var(--ink);
+    margin: 1rem;
+    margin-top: 1rem;
+    border-radius: var(--radius);
 }
 
 .site-header .container {
@@ -215,7 +218,7 @@ h1, .brand {
     flex-wrap: wrap;
     justify-content: center;
     margin-top: 4.5rem;
-    padding: 0 2rem;
+    padding: 0 3rem;
 }
 
 .experience-item {
