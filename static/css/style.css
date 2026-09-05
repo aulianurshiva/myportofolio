@@ -10,19 +10,19 @@
     --accent: #92AA56;
     --accent-dark: #31582B;
     --line: #e3d9c9;
-    --text-muted: #6b6459;
+    --text-muted: #374426;
     --radius: 4px;
 }
 
 body {
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Poppins", sans-serif;
     color: var(--ink);
     background-color: var(--paper);
     line-height: 1.6;
 }
 
 h1, .brand {
-    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-family: "Poppins", sans-serif;
 }
 
 .container {
@@ -58,6 +58,11 @@ h1, .brand {
     color: var(--ink);
     text-decoration: none;
     font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+.site-header nav a:hover{
+    color: var(--accent);
 }
 
 .hero {
@@ -177,7 +182,7 @@ h1, .brand {
 }
 
 .divider {
-    border-top: 2px solid #642230;
+    border-top: 2px solid var(--accent-dark);
     width: 100%;
 }
 
@@ -197,6 +202,7 @@ h1, .brand {
 
 .experience-item {
     width: 250px;
+    text-align: center;
 }
 
 .experiences h4 {
@@ -216,14 +222,12 @@ h1, .brand {
     color: var(--text-muted);
     margin-top: 0.5rem;
     font-style: italic;
-    text-align: center;
 }
 
 .experience-item .description {
     font-size: 0.8rem;
     color: var(--text-muted);
     margin-top: 0.5rem;
-    text-align: justify;
 }
 
 @media (max-width: 600px) {
