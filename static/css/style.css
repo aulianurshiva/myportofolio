@@ -52,7 +52,7 @@ h1, .brand {
 
 .site-header nav {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .site-header nav a {
@@ -83,7 +83,7 @@ h1, .brand {
 }
 
 .hero {
-    padding: 4.5rem 0 5rem;
+    padding: 4.5rem 0 3rem;
 }
 
 .hero-grid {
@@ -195,7 +195,7 @@ h1, .brand {
     padding: 1.5rem;
     color: var(--muted);
     font-size: 0.85rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--accent-dark);
 }
 
 .divider {
@@ -205,16 +205,17 @@ h1, .brand {
 
 .title {
     font-size: 1.5rem;
-    margin-top: 3rem;
+    margin-top: 5rem;
     text-align: center;
 }
 
 .experiences {
     display: flex;
-    gap: 3rem;
+    gap: 4rem;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: 3rem;
+    margin-top: 4.5rem;
+    padding: 0 2rem;
 }
 
 .experience-item {
@@ -245,6 +246,7 @@ h1, .brand {
     font-size: 0.8rem;
     color: var(--muted);
     margin-top: 0.5rem;
+    font-size: 0.8rem;
 }
 
 @media (max-width: 600px) {
