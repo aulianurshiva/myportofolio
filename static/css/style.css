@@ -5,10 +5,10 @@
 }
 
 :root {
-    --ink: #642230;
+    --ink: #31582B;
     --paper: #FBF7EB;
-    --accent: #F5D0C8;
-    --accent-dark: #642230;
+    --accent: #92AA56;
+    --accent-dark: #31582B;
     --line: #e3d9c9;
     --text-muted: #6b6459;
     --radius: 4px;
@@ -182,16 +182,21 @@ h1, .brand {
 }
 
 .title {
+    font-size: 1.5rem;
     margin-top: 3rem;
     text-align: center;
 }
 
 .experiences {
     display: flex;
-    gap: 2rem;
+    gap: 3rem;
     flex-wrap: wrap;
     justify-content: center;
     margin-top: 3rem;
+}
+
+.experience-item {
+    width: 250px;
 }
 
 .experiences h4 {
@@ -204,6 +209,21 @@ h1, .brand {
     padding: 0.5rem 1.1rem;
     transition: background-color 0.2s ease;
     text-align: center;
+}
+
+.experience-item .date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    font-style: italic;
+    text-align: center;
+}
+
+.experience-item .description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    text-align: justify;
 }
 
 @media (max-width: 600px) {
