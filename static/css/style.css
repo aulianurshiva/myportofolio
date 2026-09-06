@@ -7,12 +7,12 @@
 :root {
     --ink: #31582B;
     --paper: #FBF7EB;
-    --accent: #92AA56;
+    --accent: #a5bc69;
     --accent-dark: #31582B;
     --light: #f7ffe4;
     --muted: #374426;
     --lemon: #F7F06C;
-    --radius: 4px;
+    --radius: 4px;    
 }
 
 body {
@@ -34,9 +34,6 @@ h1, .brand {
 
 .site-header {
     background-color: var(--ink);
-    margin: 1rem;
-    margin-top: 1rem;
-    border-radius: var(--radius);
 }
 
 .site-header .container {
@@ -172,17 +169,6 @@ h1, .brand {
     position: relative;
 }
 
-.photo-block {
-    position: absolute;
-    top: 1.25rem;
-    left: 1.25rem;
-    width: 100%;
-    height: 100%;
-    background-color: var(--accent);
-    border-radius: var(--radius);
-    z-index: 0;
-}
-
 .avatar {
     position: relative;
     z-index: 1;
@@ -190,15 +176,15 @@ h1, .brand {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: var(--radius);
+    border-radius: 50% 20% 50% 20%;
     border: 3px solid var(--ink);
 }
 
 .site-footer {
     padding: 1.5rem;
-    color: var(--muted);
+    background-color: var(--ink);
+    color: var(--light);
     font-size: 0.85rem;
-    border-top: 1px solid var(--accent-dark);
 }
 
 .divider {
@@ -252,6 +238,70 @@ h1, .brand {
     font-size: 0.8rem;
 }
 
+.clover {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+}
+
+.clover div {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    background-color: var(--accent);
+}
+
+.clover .square {
+    width: 100%;
+    height: 100%;
+    top: 0%;
+    left: 0%;
+    border-radius: 0%;
+}
+
+.clover .leaf1-left {
+    left: -25%;
+}
+
+.clover .leaf1-right {
+    top: -25%;
+}
+
+.clover .leaf2-left {
+    right: 0;
+    top: -25%;
+}
+
+.clover .leaf2-right {
+    right: -25%;
+}
+
+.clover .leaf3-left {
+    right: -25%;
+    bottom: 0;
+}
+
+.clover .leaf3-right {
+    right: 0;
+    bottom: -25%;
+}
+
+.clover .leaf4-left {
+    bottom: -25%;
+}
+
+.clover .leaf4-right {
+    bottom: 0;
+    left: -25%;
+}
+
+.clover-1 {
+    top: clamp(-3rem, 3vw, -1rem);
+    right: -20%;
+    z-index: -1;
+}
+
 @media (max-width: 600px) {
     .hero-grid {
         grid-template-columns: 1fr;
@@ -262,7 +312,16 @@ h1, .brand {
     }
 
     .hero-photo {
+        margin-top: 0.8rem;
         max-width: 220px;
+    }
+
+    .clover-1 {
+        width: 8rem;
+        height: 8rem;
+        top: 5rem;
+        left: 9rem;
+        z-index: -1;
     }
 
     .social-links {
