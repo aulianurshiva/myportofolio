@@ -48,6 +48,7 @@ h1, .brand {
     font-weight: 700;
     color: var(--light);
     text-decoration: none;
+    position: relative;
 }
 
 .site-header nav {
@@ -296,10 +297,17 @@ h1, .brand {
     left: -25%;
 }
 
-.clover-1 {
-    top: clamp(-3rem, 3vw, -1rem);
-    right: -20%;
+.clover-photo {
+    top: -10%;
+    right: -15%;
     z-index: -1;
+}
+
+.clover-brand {
+    width: 1rem;
+    height: 1rem;
+    top: 23%;
+    right: -20%;
 }
 
 @media (max-width: 600px) {
@@ -316,7 +324,7 @@ h1, .brand {
         max-width: 220px;
     }
 
-    .clover-1 {
+    .clover-photo {
         width: 8rem;
         height: 8rem;
         top: 5rem;
