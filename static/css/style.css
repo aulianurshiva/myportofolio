@@ -48,7 +48,9 @@ h1, .brand {
     font-weight: 700;
     color: var(--light);
     text-decoration: none;
-    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
 }
 
 .site-header nav {
@@ -304,10 +306,9 @@ h1, .brand {
 }
 
 .clover-brand {
-    width: 1rem;
-    height: 1rem;
-    top: 23%;
-    right: -20%;
+    position: relative;
+    width: 0.8rem;
+    height: 0.8rem;
 }
 
 .clover-brand div {
