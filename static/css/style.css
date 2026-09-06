@@ -310,6 +310,10 @@ h1, .brand {
     right: -20%;
 }
 
+.clover-brand div {
+    background-color: var(--light);
+}
+
 @media (max-width: 600px) {
     .hero-grid {
         grid-template-columns: 1fr;
