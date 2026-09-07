@@ -588,16 +588,22 @@ h1, .brand {
     }
 
     .exploring-list {
-        margin-left: 2rem;
-        margin-right: 2rem;
+        font-size: 0.8rem;
+        gap: 0.6rem 0.5rem;
+    }
+
+    .exploring-list p+p::before {
+        margin: 0 0.6rem;
     }
 
     .fun-list {
+        font-size: 0.8rem;
         margin-left: 2rem;
         margin-right: 2rem;
     }
 
     .fun-item {
+        font-size: 0.8rem;
         margin-top: 2rem;
         margin-left: 2rem;
         margin-right: 2rem;
