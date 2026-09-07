@@ -12,6 +12,7 @@
     --light: #f7ffe4;
     --muted: #374426;
     --lemon: #F7F06C;
+    --shadow: #c4da8a;
     --radius: 4px;    
 }
 
@@ -201,47 +202,124 @@ h1, .brand {
     margin-top: 5rem;
     text-align: center;
 }
-
+/* === bagian experience === */
 .experiences {
-    display: flex;
-    gap: 4rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 4.5rem;
-    padding: 0 3rem;
+    position: relative;
+    max-width: 640px;
+    margin: 4.5rem auto 0;
+    padding-left: 2rem;
+}
+
+.experiences::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.7rem;
+    bottom: 1.7rem;
+    width: 2px;
+    background-color: var(--accent);
 }
 
 .experience-item {
-    width: 250px;
-    text-align: center;
+    position: relative;
+    margin-bottom: 2rem;
 }
 
-.experiences h3 {
+.experience-item::before {
+    content: "";
+    position: absolute;
+    left: -2.45rem;
+    top: 1.1rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--paper);
+    border: 2px solid var(--accent);
+}
+
+.experience-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.experience-item:hover .experience-summary {
+    background-color: var(--shadow);
+    transform: translateX(4px);
+}
+
+.experience-name {
     font-size: 0.85rem;
     font-weight: 600;
-    text-decoration: none;
+    line-height: 1.3;
     color: var(--light);
     background-color: var(--accent-dark);
     border-radius: var(--radius);
     padding: 0.5rem 1.1rem;
-    transition: background-color 0.2s ease;
-    text-align: center;
 }
 
-.experience-item .date {
-    font-size: 0.7rem;
+.experience-date {
+    font-size: 0.72rem;
     color: var(--muted);
-    margin-top: 0.5rem;
     font-style: italic;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.experience-item .description {
-    font-size: 0.8rem;
+.experience-description {
+    padding: 0.6rem 1rem 1.3rem;
+    max-width: 56ch;
+}
+
+.experience-description p {
+    font-size: 0.85rem;
     color: var(--muted);
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
+    margin-bottom: 0.8rem;
 }
 
+.experience-skill {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+}
+
+.experience-skill span {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--muted);
+}
+
+.experience-photos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    max-width: 56ch;
+}
+
+.experience-photos img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 2px solid var(--paper);
+    box-shadow: 0 1px 4px var(--accent-dark);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.experience-photos img:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px var(--accent-dark);
+}
+
+/* === bagian interest ===*/
 .interest-section {
     max-width: 1000px;
     margin: 4.5rem auto 0;
@@ -429,5 +507,21 @@ h1, .brand {
 
     .brand {
         font-size: 1.1rem;
+    }
+
+    .experiences {
+        padding-left: 1.75rem;
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+
+    .experience-item::before {
+        left: -2.2rem;
+    }
+
+    .experience-summary {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
     }
 }
