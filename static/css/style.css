@@ -323,6 +323,7 @@ h1, .brand {
 .interest-section {
     max-width: 1000px;
     margin: 4.5rem auto 0;
+    padding: 0 1.5rem;
     text-align: center;
 }
 
@@ -365,6 +366,23 @@ h1, .brand {
     position: relative;
     margin-top: 2rem;
     padding-left: 1rem;
+    align-self: flex-start;
+}
+
+.fun-item summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.35rem 0.6rem 0.35rem 0;
+    border-radius: var(--radius);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.fun-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.fun-item summary::marker {
+    content: "";
 }
 
 .fun-item::before {
@@ -376,15 +394,59 @@ h1, .brand {
     width: 4px;
     background: var(--accent);
     border-radius: var(--radius);
+    transition: background-color 0.2s ease, width 0.2s ease;
+}
+
+.fun-item:hover summary {
+    background-color: var(--shadow);
+    transform: translateX(3px);
+}
+
+.fun-item:hover::before {
+    background-color: var(--accent-dark);
+    width: 5px;
 }
 
 .fun-item h4 {
     font-size: 1rem;
-    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.fun-item h4::after {
+    content: "+";
+    font-size: 0.8rem;
+    color: var(--accent-dark);
+    transition: transform 0.2s ease;
+}
+
+.fun-item[open] h4::after {
+    content: "-";
+    transform: none;
+}
+
+.fun-item:hover:not([open]) h4::after {
+    transform: rotate(90deg);
 }
 
 .fun-item p {
+    display: block !important;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pad: 0 0 0 1rem;
     font-size: 0.8rem;
+    padding: 0.3rem 0 0 1rem;
+    color: var(--muted);
+    transition: max-height 0.3s ease, opacity 0.25s ease, padding-top 0.3s ease;
+}
+
+.fun-item[open] p {
+    max-height: 200px;
+    opacity: 1;
+    padding-top: 0.3rem;
 }
 
 .clover {
@@ -523,5 +585,21 @@ h1, .brand {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.4rem;
+    }
+
+    .exploring-list {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+
+    .fun-list {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+
+    .fun-item {
+        margin-top: 2rem;
+        margin-left: 2rem;
+        margin-right: 2rem;
     }
 }
