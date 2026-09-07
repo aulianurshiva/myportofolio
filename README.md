@@ -6,7 +6,7 @@ Kelas: PBP A
 
 ### Tugas 1
 
-1. Ya, saya menggunakan elemen semantik HTML5 seperti <section> dan <details> dalam membuat web portofolio saya. <section> membantu saya membagi halaman menjadi beberapa bagian yang jelas, seperti profile, experiences, dan interest. sementara itu, saya menggunakan <details> untuk membuat informasi pada bagian experiences dan interest dapat dibuka dan ditutup
+1. Ya, saya menggunakan elemen semantik HTML5 seperti < section > dan < details > dalam membuat web portofolio saya. < section > membantu saya membagi halaman menjadi beberapa bagian yang jelas, seperti profile, experiences, dan interest. sementara itu, saya menggunakan < details > untuk membuat informasi pada bagian experiences dan interest dapat dibuka dan ditutup
 
 2. Tantangan yang saya temukan saat membuat website responsive adalah menyesuaikan layout yang awalnya dibuat untuk desktop agar tetap enak dilihat di mobile. Beberapa elemen yang berdampingan harus diubah menjadi kolom ke bawah, ukuran gambar perlu disesuaikan, dan jarak antar elemen juga perlu diperhatikan agar tidak terlalu sempit. Saya mengevaluasinya dengan mencoba tampilan web pada ukuran layar yang berbeda dan melihat elemen mana yang terlalu mepet/tidak enak dilihat. Dari situ saya menggunakan media untuk mengubah layout dan ukuran elemen yang perlu sedikit penyesuaian
 
