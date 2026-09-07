@@ -20,6 +20,7 @@ body {
     color: var(--ink);
     background-color: var(--paper);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 h1, .brand {
@@ -215,12 +216,12 @@ h1, .brand {
     text-align: center;
 }
 
-.experiences h4 {
+.experiences h3 {
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
     color: var(--light);
-    background-color: var(--ink);
+    background-color: var(--accent-dark);
     border-radius: var(--radius);
     padding: 0.5rem 1.1rem;
     transition: background-color 0.2s ease;
@@ -242,8 +243,70 @@ h1, .brand {
 }
 
 .interest-section {
+    max-width: 1000px;
+    margin: 4.5rem auto 0;
+    text-align: center;
+}
+
+.interest-group {
+    margin-bottom: 6rem;
+}
+
+.interest-group h3 {
+    font-style: italic;
+}
+
+.exploring-list {
+    margin-top: 1rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.exploring-list p {
+    display: flex;
+    align-items: center;
+}
+
+.exploring-list p + p::before {
+    content: "•";
+    color: var(--accent);
+    margin: 0 2rem;
+    font-size: 2rem;
+}
+
+.fun-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem 4rem;
+    text-align: left;
+}
+
+.fun-item {
+    position: relative;
+    margin-top: 2rem;
+    padding-left: 1rem;
+}
+
+.fun-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
+    border-radius: var(--radius);
+}
+
+.fun-item h4 {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+.fun-item p {
+    font-size: 0.8rem;
 }
 
 .clover {
