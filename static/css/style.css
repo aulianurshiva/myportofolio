@@ -204,7 +204,7 @@ h1, .brand {
     text-align: center;
 }
 
-/* === experience section wrapper === */
+/* === experience section === */
 .experience-section {
     padding: 4rem 0;
     border-top: 1px solid var(--shadow);
@@ -223,7 +223,6 @@ h1, .brand {
     font-size: 2rem;
 }
 
-/* === timeline experience (center line, alternating) === */
 .experiences {
     position: relative;
     max-width: 760px;
@@ -276,6 +275,20 @@ h1, .brand {
     border: 2px solid var(--muted);
     border-radius: var(--radius);
     padding: 0.9rem 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.experience-item:nth-child(odd) .experience-card:hover {
+    transform: translateX(6px);
+}
+
+.experience-item:nth-child(even) .experience-card:hover {
+    transform: translateX(-6px);
+}
+
+.experience-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 .experience-summary {
@@ -339,7 +352,7 @@ h1, .brand {
     color: var(--muted);
 }
 
-/* === interest section (kalau nanti dipakai) === */
+/* === interest section === */
 .interest-section {
     max-width: 1000px;
     margin: 4.5rem auto 0;
