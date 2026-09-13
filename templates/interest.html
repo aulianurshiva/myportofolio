@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience - {{ name }}</title>
+    <title>Interest - {{ name }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
@@ -35,38 +35,32 @@
     </header>
 
     <main>
-        <section class="experience-section" id="experience">
-            <div class="container">
-                <p class="section-kicker">My journey so far</p>
-                <h1>Experience</h1>
-
-                <div class="experiences">
-                    {% for experience in experience_list %}
-                        <div class="experience-item">
-                            <details class="experience-card">
-                                <summary class="experience-summary">
-                                    <span class="experience-name">{{ experience.title }}</span>
-                                    <span class="experience-date">
-                                        {{ experience.started_at|date:"F Y" }} -
-                                        {% if experience.is_ongoing %}Present{% else %}{{ experience.ended_at|date:"F Y" }}{% endif %}
-                                    </span>
-                                </summary>
-                                <div class="experience-description">
-                                    <p>{{ experience.description }}</p>
-                                    {% if experience.thumbnail %}
-                                        <div class="experience-photo">
-                                            <img src="{{ experience.thumbnail }}" alt="{{ experience.title }}">
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </details>
-                        </div>
+        <div class="interest-section">
+            <div class="interest-group">
+                <h3>Things I'm Currently Exploring</h3>
+                <div class="exploring-list">
+                    {% for interest in exploring_list %}
+                        <p>{{ interest.name }}</p>
                     {% empty %}
-                        <p class="empty-state">No experiences added yet.</p>
+                        <p class="empty-state">Nothing added yet.</p>
                     {% endfor %}
                 </div>
             </div>
-        </section>
+
+            <div class="interest-group">
+                <h3>Things I Do For Fun</h3>
+                <div class="fun-list">
+                    {% for interest in fun_list %}
+                        <details class="fun-item">
+                            <summary><h4>{{ interest.name }}</h4></summary>
+                            <p>{{ interest.description }}</p>
+                        </details>
+                    {% empty %}
+                        <p class="empty-state">Nothing added yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer class="site-footer">

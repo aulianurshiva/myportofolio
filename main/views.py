@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db.models import F
-from main.models import Experience
+from main.models import Experience, Interest
 
 
 def show_main(request):
@@ -21,3 +21,11 @@ def show_experience(request):
         "experience_list": Experience.objects.all().order_by(F("ended_at").desc(nulls_first=True), "-started_at"),
     }
     return render(request, "experience.html", context)
+
+def show_interest(request):
+    context = {
+        "name": "Aulia Nur Shiva",
+        "exploring_list": Interest.objects.filter(category="exploring"),
+        "fun_list": Interest.objects.filter(category="fun")
+    }
+    return render(request, "interest.html", context)
