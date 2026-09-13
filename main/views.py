@@ -6,6 +6,7 @@ from main.models import Experience, Interest
 def show_main(request):
     context = {
         "name": "Aulia Nur Shiva",
+        "short_name": "Aulia",
         "npm": "2506619316",
         "study_program": "S1 Information Systems",
         "bio": (
@@ -18,6 +19,7 @@ def show_main(request):
 def show_experience(request):
     context = {
         "name": "Aulia Nur Shiva",
+        "short_name": "Aulia",
         "experience_list": Experience.objects.all().order_by(F("ended_at").desc(nulls_first=True), "-started_at"),
     }
     return render(request, "experience.html", context)
@@ -25,6 +27,7 @@ def show_experience(request):
 def show_interest(request):
     context = {
         "name": "Aulia Nur Shiva",
+        "short_name": "Aulia",
         "exploring_list": Interest.objects.filter(category="exploring"),
         "fun_list": Interest.objects.filter(category="fun")
     }

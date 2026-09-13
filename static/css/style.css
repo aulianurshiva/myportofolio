@@ -64,6 +64,10 @@ h1, .brand {
     gap: 0.6rem;
 }
 
+.brand-short {
+    display: none;
+}
+
 .site-header nav {
     display: flex;
     gap: 1.5rem;
@@ -564,8 +568,13 @@ h1, .brand {
         font-size: 0.8rem;
     }
 
-    .brand {
+    .brand-full {
+        display: none;
+    }
+
+    .brand-short {
         font-size: 1.1rem;
+        display: inline;
     }
 
     .experiences {
