@@ -406,6 +406,7 @@ h1, .brand {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
+    align-items: start;
 }
 
 .fun-list .empty-state {
