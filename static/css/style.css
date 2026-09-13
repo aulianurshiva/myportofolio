@@ -391,6 +391,11 @@ h1, .brand {
     background-color: var(--accent-dark);
     border-radius: var(--radius);
     padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.exploring-list p:hover {
+    background-color: var(--accent);
 }
 
 .exploring-list .empty-state {
