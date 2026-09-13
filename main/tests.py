@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from main.models import Experience
+from main.models import Experience, Interest
 
 
 class MainTest(TestCase):
@@ -10,7 +10,7 @@ class MainTest(TestCase):
         self.experience = Experience.objects.create(
             title="Asisten Dosen PBP",
             description="Membantu mahasiswa memahami pengembangan web.",
-            category="part-time",
+            started_at = timezone.now(),
         )
 
     def test_main_url_is_accessible(self):
@@ -28,7 +28,6 @@ class MainTest(TestCase):
 
     def test_experience_model(self):
         self.assertEqual(str(self.experience), "Asisten Dosen PBP")
-        self.assertEqual(self.experience.category, "part-time")
         self.assertTrue(self.experience.is_ongoing)
 
     def test_experience_page(self):
@@ -38,15 +37,14 @@ class MainTest(TestCase):
         self.assertTemplateUsed(response, "experience.html")
         self.assertContains(response, self.experience.title)
         self.assertContains(response, self.experience.description)
-        self.assertContains(response, "Part-Time")
-        self.assertContains(response, "Sedang berlangsung")
+        self.assertContains(response, "Present")
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
 
     def test_empty_experience_page(self):
         Experience.objects.all().delete()
         response = self.client.get(reverse("main:show_experience"))
 
-        self.assertContains(response, "Belum ada pengalaman yang ditambahkan.")
+        self.assertContains(response, "No experiences added yet.")
 
     def test_completed_experience(self):
         self.experience.ended_at = timezone.now()
@@ -54,5 +52,35 @@ class MainTest(TestCase):
         response = self.client.get(reverse("main:show_experience"))
 
         self.assertFalse(self.experience.is_ongoing)
-        self.assertContains(response, "Selesai")
-        self.assertNotContains(response, "Sedang berlangsung")
+        response = self.client.get(reverse("main:show_experience"))
+        self.assertNotContains(response, "Present")
+
+class InterestTest(TestCase):
+    def setUp(self):
+        self.interest = Interest.objects.create(
+            name="Gaming",
+            category="fun",
+            description="I play games whenever I have the time.",
+        )
+
+    def test_interest_url_is_accessible(self):
+        response = self.client.get(reverse("main:show_interest"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "interest.html")
+
+    def test_interest_model(self):
+        self.assertEqual(str(self.interest), "Gaming")
+        self.assertEqual(self.interest.category, "fun")
+
+    def test_interest_page_shows_data(self):
+        response = self.client.get(reverse("main:show_interest"))
+
+        self.assertContains(response, self.interest.name)
+        self.assertContains(response, self.interest.description)
+
+    def test_empty_interest_page(self):
+        Interest.objects.all().delete()
+        response = self.client.get(reverse("main:show_interest"))
+
+        self.assertContains(response, "Nothing added yet.")
