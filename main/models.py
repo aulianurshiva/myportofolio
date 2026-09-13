@@ -14,3 +14,13 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+
+class Interest(models.Model):
+    CATEGORY_CHOICES = [('exploring', 'Currently Exploring'), ('fun', 'For Fun')]
+
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
