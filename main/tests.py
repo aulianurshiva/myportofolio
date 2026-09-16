@@ -84,3 +84,22 @@ class InterestTest(TestCase):
         response = self.client.get(reverse("main:show_interest"))
 
         self.assertContains(response, "Nothing added yet.")
+
+    def test_create_interest_via_form(self):
+        response = self.client.post(reverse("main:create_interest"), {
+            "name": "Reading",
+            "category": "exploring",
+            "description": "",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Interest.objects.filter(name="Reading").exists())
+
+    def test_delete_interest(self):
+        response = self.client.post(reverse("main:delete_interest", args=[self.interest.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Interest.objects.filter(id=self.interest.id).exists())
+
+    def test_get_interest_json(self):
+        response = self.client.get(reverse("main:get_interest_json"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")

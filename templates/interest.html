@@ -1,80 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" type="image/png" href="/static/img/favicon.png">
+{% extends 'base.html' %}
+{% block meta %}
     <title>Interest - {{ name }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">
-                <span class="brand-full">{{ name }}</span>
-                <span class="brand-short">{{ short_name }}</span>
-                <div class="clover clover-brand">
-                    <div class="square"></div>
-                    <div class="leaf1-left"></div>
-                    <div class="leaf1-right"></div>
-                    <div class="leaf2-left"></div>
-                    <div class="leaf2-right"></div>
-                    <div class="leaf3-left"></div>
-                    <div class="leaf3-right"></div>
-                    <div class="leaf4-left"></div>
-                    <div class="leaf4-right"></div>
-                    <div class="stem"></div>
-                </div>
-            </a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_interest' %}">Interest</a>
-            </nav>
-        </div>
-    </header>
-
+{% endblock meta %}
+{% block content %}
     <main>
         <section class="interest-section" id="interest">
-        <div class="container">
-            <p class="section-kicker">What I'm into</p>
-            <h1>Interest</h1>
+            <div class="container">
+                <p class="section-kicker">What I'm into</p>
+                <div class="interest-header">
+                    <h1>Interest</h1>
+                    <a href="{% url 'main:create_interest' %}" class="button interest-add-button">
+                        <span aria-hidden="true">+</span>
+                        Add Interest
+                    </a>
+                </div>
+                <form method="get" action="{% url 'main:show_interest' %}" class="interest-search">
+                    <input type="search"
+                           name="name"
+                           value="{{ name_query }}"
+                           placeholder="Search by interest name"
+                           class="interest-search__input"
+                           aria-label="Search by interest name">
+                    <button type="submit" class="button">Search</button>
+                </form>
 
-            <div class="interest-group">
-                <h3>Things I'm Currently Exploring</h3>
-                <div class="exploring-list">
-                    {% for interest in exploring_list %}
-                        <p>{{ interest.name }}</p>
-                    {% empty %}
-                        <p class="empty-state">Nothing added yet.</p>
-                    {% endfor %}
+                <div class="interest-group">
+                    <h3>Things I'm Currently Exploring</h3>
+                    <div class="exploring-list">
+                        {% for interest in exploring_list %}
+                            <div class="exploring-item">
+                                <p>{{ interest.name }}</p>
+                                {% include "components/interest_delete_modal.html" with interest=interest %}
+                            </div>
+                        {% empty %}
+                            {% if name_query %}
+                                <p class="empty-state">No interest found with that name.</p>
+                            {% else %}
+                                <p class="empty-state">Nothing added yet.</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="interest-group">
+                    <h3>Things I Do For Fun</h3>
+                    <div class="fun-list">
+                        {% for interest in fun_list %}
+                            <div class="fun-item-wrapper">
+                                <details class="fun-item">
+                                    <summary><h4>{{ interest.name }}</h4></summary>
+                                    <p>{{ interest.description }}</p>
+                                </details>
+                                {% include "components/interest_delete_modal.html" with interest=interest %}
+                            </div>
+                        {% empty %}
+                            {% if name_query %}
+                                <p class="empty-state">No interest found with that name.</p>
+                            {% else %}
+                                <p class="empty-state">Nothing added yet.</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-
-            <div class="interest-group">
-                <h3>Things I Do For Fun</h3>
-                <div class="fun-list">
-                    {% for interest in fun_list %}
-                        <details class="fun-item">
-                            <summary><h4>{{ interest.name }}</h4></summary>
-                            <p>{{ interest.description }}</p>
-                        </details>
-                    {% empty %}
-                        <p class="empty-state">Nothing added yet.</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
         </section>
     </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-</body>
-</html>
+{% endblock content %}
