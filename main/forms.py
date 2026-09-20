@@ -1,6 +1,6 @@
-from django.forms import ModelForm, TextInput, Textarea, Select
+from django.forms import ModelForm, TextInput, Textarea, Select, URLInput, DateTimeInput
 
-from main.models import Interest
+from main.models import Interest, Experience
 
 
 class InterestForm(ModelForm):
@@ -19,3 +19,31 @@ class InterestForm(ModelForm):
             "category": Select(),
             "description": Textarea(attrs={"placeholder": "Tell us about this interest","rows": 3}),
         }
+
+class ExperienceForm(ModelForm):
+    class Meta:
+        model = Experience
+        fields = ["title","description","thumbnail","started_at","ended_at"]
+
+        labels = {
+            "title": "Title",
+            "description": "Description",
+            "thumbnail": "Thumbnail URL (optional)",
+            "started_at": "Start Date",
+            "ended_at": "End Date (leave empty if ongoing)"
+        }
+
+        widgets = {
+            "title": TextInput(attrs={"placeholder": "Teaching Assistant", "maxlength": 255}),
+            "description": Textarea(attrs={"placeholder": "Tell us about this experience", "rows": 3}),
+            "thumbnail": URLInput(attrs={"placeholder": "https://..."}),
+            "started_at": DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
+            "ended_at": DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
+        }
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields["started_at"].input_formats = ["%Y-%m-%dT%H:%M"]
+            self.fields["ended_at"].input_formats = ["%Y-%m-%dT%H:%M"]
+            self.fields["thumbnail"].required = False
+            self.fields["ended_at"].required = False
