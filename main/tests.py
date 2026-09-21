@@ -55,6 +55,42 @@ class MainTest(TestCase):
         response = self.client.get(reverse("main:show_experience"))
         self.assertNotContains(response, "Present")
 
+    def test_create_experience_via_form(self):
+        response = self.client.post(reverse("main:create_experience"), {
+            "title": "New Role",
+            "description": "Doing something new.",
+            "thumbnail": "",
+            "started_at": "2026-01-01T00:00",
+            "ended_at": "",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Experience.objects.filter(title="New Role").exists())
+
+    def test_update_experience_via_form(self):
+        response = self.client.post(
+            reverse("main:update_experience", args=[self.experience.id]),
+            {
+                "title": "Updated Title",
+                "description": self.experience.description,
+                "thumbnail": "",
+                "started_at": "2026-01-01T00:00",
+                "ended_at": "",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.experience.refresh_from_db()
+        self.assertEqual(self.experience.title, "Updated Title")
+
+    def test_delete_experience(self):
+        response = self.client.post(reverse("main:delete_experience", args=[self.experience.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Experience.objects.filter(id=self.experience.id).exists())
+
+    def test_get_experience_json(self):
+        response = self.client.get(reverse("main:get_experience_json"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
 class InterestTest(TestCase):
     def setUp(self):
         self.interest = Interest.objects.create(
