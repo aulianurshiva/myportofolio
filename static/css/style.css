@@ -700,6 +700,17 @@ h1, .brand {
     margin-top: 1.5rem;
 }
 
+.button-small {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+}
+
+.experience-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
 @media (max-width: 600px) {
     .interest-header {
         align-items: flex-start;

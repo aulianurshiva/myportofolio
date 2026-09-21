@@ -22,7 +22,7 @@ def show_main(request):
 
 # === Buat experience ===
 def get_experience_json(request):
-    experience = Experience.objects.all()
+    experiences = Experience.objects.all()
     experience_json = serializers.serialize("json", experiences)
     return HttpResponse(experience_json, content_type="application/json")
 
