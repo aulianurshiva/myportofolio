@@ -4,7 +4,7 @@ from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from main.forms import InterestForm
+from main.forms import InterestForm, ExperienceForm
 from main.models import Experience, Interest
 
 
@@ -20,8 +20,23 @@ def show_main(request):
     }
     return render(request, "index.html", context)
 
+# === Buat experience ===
+def get_experience_json(request):
+    experience = Experience.objects.all()
+    experience_json = serializers.serialize("json", experiences)
+    return HttpResponse(experience_json, content_type="application/json")
 
 def show_experience(request):
+    json_response = get_experience_json(request)
+    entries = serializers.deserialize("json", json_response.content.decode("utf-8"))
+    experience_list = [entry.object for entry in entries]
+    experience_list.sort(
+        key=lambda e: (
+            e.ended_at is not None,
+            -(e.started_at.timestamp() if e.started_at else 0),
+        )
+    )
+
     context = {
         "name": "Aulia Nur Shiva",
         "short_name": "Aulia",
@@ -29,6 +44,50 @@ def show_experience(request):
     }
     return render(request, "experience.html", context)
 
+def create_experience(request):
+    form = ExperienceForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "New experience added successfully!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Aulia Nur Shiva",
+        "short_name": "Aulia",
+        "form": form,
+        "is_update": False
+    }
+    return render(request, "experience_form.html", context)
+
+def update_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+    form = ExperienceForm(request.POST or None, instance=experience)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Experience updated successfully!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Aulia Nur Shiva",
+        "short_name": "Aulia",
+        "form": form,
+        "is_update": True,
+    }
+    return render(request, "experience_form.html", context)
+
+def delete_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Experience deleted successfully!")
+        return redirect("main:show_experience")
+
+    return redirect("main:show_experience")
+
+# === Buat interest ===
 def get_interest_json(request):
     name_query = request.GET.get("name", "").strip()
     interests = Interest.objects.all()
@@ -38,7 +97,7 @@ def get_interest_json(request):
 
     interest_json = serializers.serialize("json", interests)
     return HttpResponse(interest_json, content_type="application/json")
-  
+
 def show_interest(request):
     json_response = get_interest_json(request)
     interests = serializers.deserialize("json", json_response.content.decode("utf-8"))
