@@ -711,6 +711,51 @@ h1, .brand {
     margin-top: 1rem;
 }
 
+.nav-user {
+    color: var(--lemon);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.form-help {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+}
+
+.form-message {
+    background: var(--accent);
+    color: var(--ink);
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.star-form {
+    display: inline;
+}
+
+.button-star {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--ink);
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+}
+
+.button-star.is-starred {
+    background: var(--accent);
+}
+
+.star-count {
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    font-size: 0.8rem;
+}
+
 @media (max-width: 600px) {
     .interest-header {
         align-items: flex-start;

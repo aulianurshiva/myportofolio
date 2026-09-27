@@ -6,13 +6,17 @@
     <main>
         <section class="interest-section" id="interest">
             <div class="container">
-                <p class="section-kicker">What I'm into</p>
                 <div class="interest-header">
-                    <h1>Interest</h1>
-                    <a href="{% url 'main:create_interest' %}" class="button interest-add-button">
-                        <span aria-hidden="true">+</span>
-                        Add Interest
-                    </a>
+                    <div>
+                        <p class="section-kicker">What I'm into</p>
+                        <h1>Interest</h1>
+                    </div>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:create_interest' %}" class="button interest-add-button">
+                            <span aria-hidden="true">+</span>
+                            Add Interest
+                        </a>
+                    {% endif %}
                 </div>
                 <form method="get" action="{% url 'main:show_interest' %}" class="interest-search">
                     <input type="search"
@@ -30,7 +34,10 @@
                         {% for interest in exploring_list %}
                             <div class="exploring-item">
                                 <p>{{ interest.name }}</p>
-                                {% include "components/interest_delete_modal.html" with interest=interest %}
+                                {% include "components/interest_star.html" with interest=interest %}
+                                {% if user.is_superuser %}
+                                    {% include "components/interest_delete_modal.html" with interest=interest %}
+                                {% endif %}
                             </div>
                         {% empty %}
                             {% if name_query %}
@@ -51,7 +58,10 @@
                                     <summary><h4>{{ interest.name }}</h4></summary>
                                     <p>{{ interest.description }}</p>
                                 </details>
-                                {% include "components/interest_delete_modal.html" with interest=interest %}
+                                {% include "components/interest_star.html" with interest=interest %}
+                                {% if user.is_superuser %}
+                                    {% include "components/interest_delete_modal.html" with interest=interest %}
+                                {% endif %}
                             </div>
                         {% empty %}
                             {% if name_query %}

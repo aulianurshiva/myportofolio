@@ -9,7 +9,11 @@ from main.views import (
     show_interest, 
     create_interest, 
     delete_interest, 
-    get_interest_json
+    get_interest_json,
+    register,
+    logout_user,
+    login_user,
+    toggle_star_interest,
 )
 
 app_name = "main"
@@ -28,4 +32,9 @@ urlpatterns = [
     path("interest/add/", create_interest, name="create_interest"),
     path("interest/<int:interest_id>/delete/",delete_interest,name="delete_interest"),
     path("api/interest/", get_interest_json, name="get_interest_json"),
+    path("interest/<int:interest_id>/star/", toggle_star_interest, name="toggle_star_interest"),
+
+    path("register/", register, name="register"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
 ]
