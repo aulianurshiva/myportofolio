@@ -41,9 +41,9 @@ class ExperienceForm(ModelForm):
             "ended_at": DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
         }
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.fields["started_at"].input_formats = ["%Y-%m-%dT%H:%M"]
-            self.fields["ended_at"].input_formats = ["%Y-%m-%dT%H:%M"]
-            self.fields["thumbnail"].required = False
-            self.fields["ended_at"].required = False
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["started_at"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["ended_at"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["thumbnail"].required = False
+        self.fields["ended_at"].required = False

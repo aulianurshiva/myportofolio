@@ -19,6 +19,10 @@
                     {% endif %}
                 </div>
 
+                {% for message in messages %}
+                    <p class="form-message">{{ message }}</p>
+                {% endfor %}
+
                 <div class="experiences">
                     {% for experience in experience_list %}
                         <div class="experience-item">
@@ -38,8 +42,13 @@
                                         </div>
                                     {% endif %}
                                     <div class="experience-actions">
-                                        <a href="{% url 'main:update_experience' experience.id %}" class="button button button-small">Edit</a>
-                                        {% include "components/experience_delete_modal.html" with experience=experience %}
+                                        {% include "components/experience_star.html" with experience=experience %}
+                                        {% if can_edit %}
+                                            <a href="{% url 'main:update_experience' experience.id %}" class="button button button-small">Edit</a>
+                                        {% endif %}
+                                        {% if user.is_superuser %}
+                                            {% include "components/experience_delete_modal.html" with experience=experience %}
+                                        {% endif %}
                                     </div>
                                 </div>
                             </details>
