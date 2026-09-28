@@ -29,7 +29,10 @@ def show_main(request):
 # === Buat experience ===
 def get_experience_json(request):
     experiences = Experience.objects.all()
-    experience_json = serializers.serialize("json", experiences)
+    experience_json = serializers.serialize(
+        "json", experiences,
+        fields=("title", "description", "thumbnail", "started_at", "ended_at"),
+    )
     return HttpResponse(experience_json, content_type="application/json")
 
 def show_experience(request):
@@ -46,11 +49,18 @@ def show_experience(request):
     context = {
         "name": "Aulia Nur Shiva",
         "short_name": "Aulia",
-        "experience_list": Experience.objects.all().order_by(F("ended_at").desc(nulls_first=True), "-started_at"),
+        "experience_list": Experience.objects.all()
+            .order_by(F("ended_at").desc(nulls_first=True), "-started_at")
+            .prefetch_related("starred_by"),
+        "can_edit": can_edit(request.user),    
     }
     return render(request, "experience.html", context)
 
+@login_required(login_url="/login/")
 def create_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     form = ExperienceForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
@@ -66,7 +76,11 @@ def create_experience(request):
     }
     return render(request, "experience_form.html", context)
 
+@login_required(login_url="/login/")
 def update_experience(request, experience_id):
+    if not can_edit(request.user):
+        raise PermissionDenied
+    
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
 
@@ -83,7 +97,11 @@ def update_experience(request, experience_id):
     }
     return render(request, "experience_form.html", context)
 
+@login_required(login_url="/login/")
 def delete_experience(request, experience_id): 
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     experience = get_object_or_404(Experience, pk=experience_id)
 
     if request.method == "POST":
@@ -101,7 +119,7 @@ def get_interest_json(request):
     if name_query:
         interests = interests.filter(name__icontains=name_query)
 
-    interest_json = serializers.serialize("json", interests, use_natural_foreign_keys=True)
+    interest_json = serializers.serialize("json", interests, fields=("name", "category", "description"))
     return HttpResponse(interest_json, content_type="application/json")
 
 def show_interest(request):
@@ -204,3 +222,21 @@ def toggle_star_interest(request, interest_id):
             interest.starred_by.add(request.user)
 
     return redirect("main:show_interest")
+
+@login_required(login_url="/login/")
+def toggle_star_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        if request.user in experience.starred_by.all():
+            experience.starred_by.remove(request.user)
+        else:
+            experience.starred_by.add(request.user)
+
+    return redirect("main:show_experience")
+
+def is_editor(user):
+    return user.is_authenticated and user.groups.filter(name="Editor").exists()
+
+def can_edit(user):
+    return user.is_superuser or is_editor(user)
