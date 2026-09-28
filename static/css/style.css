@@ -397,11 +397,6 @@ h1, .brand {
     background-color: var(--accent-dark);
     border-radius: var(--radius);
     padding: 0.5rem 1rem;
-    transition: background-color 0.2s ease;
-}
-
-.exploring-item > p:hover {
-    background-color: var(--accent);
 }
 
 .exploring-list .empty-state {
@@ -590,14 +585,45 @@ h1, .brand {
 
 .exploring-item {
     display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.exploring-top {
+    display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
+.exploring-top > p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--light);
+    background-color: var(--accent-dark);
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.exploring-top > p:hover {
+    background-color: var(--accent);
+}
+
 .fun-item-wrapper {
     display: flex;
-    flex-direction: flex-start;
+    flex-direction: column;
     gap: 0.5rem;
+}
+
+.fun-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.fun-top .fun-item {
+    flex: 1;
 }
 
 .fun-item-wrapper .fun-item {
@@ -737,8 +763,10 @@ h1, .brand {
 }
 
 .button-star {
+    size: 0.5 rem;
     display: inline-flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.4rem;
     background: var(--ink);
     padding: 0.35rem 0.7rem;
