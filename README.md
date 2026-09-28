@@ -31,7 +31,7 @@ Kelas: PBP A
 3. Ketika kita mengakses URL untuk melihat data portofolio dalam bentuk JSON, request dari pengguna akan diteruskan dari urls.py ke fungsi view yang sesuai. Di dalam view tersebut, kita mengambil data portofolio dari database menggunakan model Django. Masalahnya, data yang diambil dari database masih berbentuk object atau queryset Django, sehingga belum bisa langsung dikembalikan sebagai JSON. Karena itu, kita melakukan serialization, yaitu mengubah data tersebut ke bentuk yang lebih umum seperti dictionary atau list yang bisa direpresentasikan dalam JSON. Setelah proses tersebut selesai, data yang sudah berbentuk teks JSON dikembalikan melalui HttpResponse dengan content_type diatur ke application/json, sehingga data portofolio bisa ditampilkan dalam format JSON dan juga dapat dibaca oleh aplikasi atau frontend lain
 ---------------------------------------------------------------------------------------
 
-Saya juga menggunakan bantuan gen AI dalam proses pengerjaan tugas, terutama untuk memahami tugas dan mencari solusi ketika mengalami kendala. Berikut tautan chatnya: https://share.gemini.google/I7AsKpGsWLnz (akan selalu menggunakan room chat yang sama)
+Saya juga menggunakan bantuan gen AI dalam proses pengerjaan tugas, terutama untuk memahami tugas dan mencari solusi ketika mengalami kendala. Berikut tautan chatnya: https://share.gemini.google/umQBon3eQHb5 (akan selalu menggunakan room chat yang sama)
 
 
 Selain itu, saya juga menggunakan beberapa sumber maupun inspirasi lainnya yang saya cantumkan pada tautan berikut:
