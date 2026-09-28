@@ -341,7 +341,7 @@ h1, .brand {
 }
 
 .experience-item details[open] .experience-description {
-    max-height: 400px;
+    max-height: 1500px;
     opacity: 1;
 }
 
@@ -763,14 +763,14 @@ h1, .brand {
 }
 
 .button-star {
-    size: 0.5 rem;
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 0.4rem;
+    gap: 0.3rem;
     background: var(--ink);
     padding: 0.35rem 0.7rem;
     font-size: 0.75rem;
+    line-height: 1.6;
 }
 
 .button-star.is-starred {
@@ -778,10 +778,11 @@ h1, .brand {
 }
 
 .star-count {
-    padding: 0.05rem 0.4rem;
+    padding: 0 0.4rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.25);
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+    line-height: 1.4;
 }
 
 @media (max-width: 600px) {
