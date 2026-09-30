@@ -15,8 +15,6 @@ EXPERIENCE_FORM = {
 
 
 class BaseTest(TestCase):
-    """Menyiapkan data dan 3 akun: user biasa, editor, superuser."""
-
     def setUp(self):
         self.experience = Experience.objects.create(
             title="Asisten Dosen PBP",
@@ -176,12 +174,15 @@ class InterestTest(BaseTest):
         response = self.client.get(reverse("main:show_interest"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "interest.html")
+
+    def test_interest_data_loaded_via_json(self):
+        response = self.client.get(reverse("main:get_interest_json"))
         self.assertContains(response, self.interest.name)
 
-    def test_empty_interest_page(self):
+    def test_empty_interest_json(self):
         Interest.objects.all().delete()
-        response = self.client.get(reverse("main:show_interest"))
-        self.assertContains(response, "Nothing added yet.")
+        response = self.client.get(reverse("main:get_interest_json"))
+        self.assertEqual(response.json(), [])
 
     def test_create_delete_interest_permissions(self):
         create_url = reverse("main:create_interest")
@@ -211,10 +212,17 @@ class JsonApiTest(BaseTest):
         self.assertNotContains(response, "starred_by")
         self.assertNotContains(response, "regular")
 
-    def test_interest_json_no_leak(self):
+    def test_interest_json_star_fields(self):
         self.interest.starred_by.add(self.regular)
-        response = self.client.get(reverse("main:get_interest_json"))
+        url = reverse("main:get_interest_json")
+
+        response = self.client.get(url)  # anonim
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
-        self.assertNotContains(response, "starred_by")
-        self.assertNotContains(response, "regular")
+        fields = response.json()[0]["fields"]
+        self.assertEqual(fields["star_count"], 1)
+        self.assertFalse(fields["is_starred"])
+
+        self.login_as(self.regular)
+        fields = self.client.get(url).json()[0]["fields"]
+        self.assertTrue(fields["is_starred"])
