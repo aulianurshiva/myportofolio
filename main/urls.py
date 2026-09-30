@@ -15,6 +15,7 @@ from main.views import (
     login_user,
     toggle_star_interest,
     toggle_star_experience,
+    create_interest_ajax,
 )
 
 app_name = "main"
@@ -35,6 +36,7 @@ urlpatterns = [
     path("interest/<int:interest_id>/delete/",delete_interest,name="delete_interest"),
     path("api/interest/", get_interest_json, name="get_interest_json"),
     path("interest/<int:interest_id>/star/", toggle_star_interest, name="toggle_star_interest"),
+    path("interest/add-ajax/", create_interest_ajax, name="create_interest_ajax"),
 
     path("register/", register, name="register"),
     path("login/", login_user, name="login"),

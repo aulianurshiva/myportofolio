@@ -12,14 +12,18 @@
                         <h1>Interest</h1>
                     </div>
                     {% if user.is_superuser %}
-                        <a href="{% url 'main:create_interest' %}" class="button interest-add-button">
+                        <button type="button"
+                                class="button interest-add-button"
+                                popovertarget="add-interest-modal">
                             <span aria-hidden="true">+</span>
                             Add Interest
-                        </a>
+                        </button>
                     {% endif %}
                 </div>
-                <form method="get" action="{% url 'main:show_interest' %}" class="interest-search">
+
+                <form id="interest-search-form" class="interest-search">
                     <input type="search"
+                           id="search-input"
                            name="name"
                            value="{{ name_query }}"
                            placeholder="Search by interest name"
@@ -28,55 +32,254 @@
                     <button type="submit" class="button">Search</button>
                 </form>
 
-                <div class="interest-group">
-                    <h3>Things I'm Currently Exploring</h3>
-                    <div class="exploring-list">
-                        {% for interest in exploring_list %}
-                            <div class="exploring-item">
-                                <div class="exploring-top">
-                                    <p>{{ interest.name }}</p>
-                                    {% if user.is_superuser %}
-                                        {% include "components/interest_delete_modal.html" with interest=interest %}
-                                    {% endif %}
-                                </div>
-                                {% include "components/interest_star.html" with interest=interest %}
-                            </div>
-                        {% empty %}
-                            {% if name_query %}
-                                <p class="empty-state">No interest found with that name.</p>
-                            {% else %}
-                                <p class="empty-state">Nothing added yet.</p>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+                <div id="loading" class="empty-state hide">
+                    <p>Loading interests...</p>
                 </div>
 
-                <div class="interest-group">
-                    <h3>Things I Do For Fun</h3>
-                    <div class="fun-list">
-                        {% for interest in fun_list %}
-                        <div class="fun-item-wrapper">
-                            <div class="fun-top">
-                                <details class="fun-item">
-                                    <summary><h4>{{ interest.name }}</h4></summary>
-                                    <p>{{ interest.description }}</p>
-                                </details>
-                                {% if user.is_superuser %}
-                                    {% include "components/interest_delete_modal.html" with interest=interest %}
-                                {% endif %}
-                            </div>
-                            {% include "components/interest_star.html" with interest=interest %}
-                        </div>
-                        {% empty %}
-                            {% if name_query %}
-                                <p class="empty-state">No interest found with that name.</p>
-                            {% else %}
-                                <p class="empty-state">Nothing added yet.</p>
-                            {% endif %}
-                        {% endfor %}
+                <div id="error" class="empty-state hide">
+                    <p>Failed to load interests. Please try again.</p>
+                </div>
+
+                <div id="results" class="hide">
+                    <div class="interest-group">
+                        <h3>Things I'm Currently Exploring</h3>
+                        <div id="exploring-list" class="exploring-list"></div>
+                    </div>
+                    <div class="interest-group">
+                        <h3>Things I Do For Fun</h3>
+                        <div id="fun-list" class="fun-list"></div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
+    {% if user.is_superuser %}
+        {% include "components/interest_form_modal.html" %}
+    {% endif %}
+
+    <script>
+    // Konfigurasi
+    const BASE_INTEREST_ENDPOINT = "{% url 'main:get_interest_json' %}";
+    const CREATE_INTEREST_ENDPOINT = "{% url 'main:create_interest_ajax' %}";
+    const DELETE_URL_TEMPLATE = "{% url 'main:delete_interest' 0 %}";
+    const STAR_URL_TEMPLATE = "{% url 'main:toggle_star_interest' 0 %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let interestAbortController;
+    let searchDebounceTimer;
+
+    // Elemen DOM
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const resultsContainer = document.getElementById('results');
+    const exploringList = document.getElementById('exploring-list');
+    const funList = document.getElementById('fun-list');
+    const searchForm = document.getElementById('interest-search-form');
+    const searchInput = document.getElementById('search-input');
+    const interestForm = document.getElementById('interest-form');
+
+    function displayPageSection({ showLoading = false, showError = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        resultsContainer.classList.toggle('hide', !showGrid);
+    }
+
+    // Mengubah karakter khusus HTML menjadi entity (anti XSS)
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function urlFor(template, id) {
+        return template.replace('/0/', `/${id}/`);
+    }
+
+    function buildStarFormHtml(interest, id) {
+        const isStarredClass = interest.is_starred ? " is-starred" : "";
+        const starText = interest.is_starred ? "Unstar" : "Star";
+        const starTitle = interest.star_count > 0
+            ? `Starred by ${escapeHtml(interest.starred_by_names)}`
+            : "Be the first to give a star";
+
+        return `
+            <form method="post" action="${urlFor(STAR_URL_TEMPLATE, id)}" class="star-form">
+                {% csrf_token %}
+                <button type="submit"
+                        class="button button-star${isStarredClass}"
+                        title="${starTitle}">
+                    <span aria-hidden="true">★</span>
+                    ${starText}
+                    <span class="star-count">${interest.star_count}</span>
+                </button>
+            </form>`;
+    }
+
+    function buildDeleteHtml(id, safeName) {
+        if (!IS_SUPERUSER) return '';
+        return `
+            <form method="post" action="${urlFor(DELETE_URL_TEMPLATE, id)}"
+                  onsubmit="return confirm('Are you sure you want to delete this interest?');">
+                {% csrf_token %}
+                <button type="submit" class="delete-trigger"
+                        aria-label="Delete ${safeName}" title="Delete interest">✖</button>
+            </form>`;
+    }
+
+    function buildInterestElement(item) {
+        const interest = item.fields;
+        const id = item.pk;
+        const safeName = escapeHtml(interest.name);
+        const deleteHtml = buildDeleteHtml(id, safeName);
+        const starHtml = buildStarFormHtml(interest, id);
+
+        const wrapper = document.createElement('div');
+
+        if (interest.category === 'exploring') {
+            wrapper.className = 'exploring-item';
+            wrapper.innerHTML = `
+                <div class="exploring-top">
+                    <p>${safeName}</p>
+                    ${deleteHtml}
+                </div>
+                ${starHtml}`;
+        } else {
+            wrapper.className = 'fun-item-wrapper';
+            wrapper.innerHTML = `
+                <div class="fun-top">
+                    <details class="fun-item">
+                        <summary><h4>${safeName}</h4></summary>
+                        <p>${escapeHtml(interest.description)}</p>
+                    </details>
+                    ${deleteHtml}
+                </div>
+                ${starHtml}`;
+        }
+        return wrapper;
+    }
+
+    function renderGroup(container, items, searchQuery) {
+        container.innerHTML = '';
+        if (items.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'empty-state';
+            empty.textContent = searchQuery ? 'No interest found with that name.' : 'Nothing added yet.';
+            container.appendChild(empty);
+            return;
+        }
+        items.forEach(item => container.appendChild(buildInterestElement(item)));
+    }
+
+    async function fetchInterests(searchQuery = "") {
+        if (interestAbortController) interestAbortController.abort();
+        interestAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery
+                ? `${BASE_INTEREST_ENDPOINT}?name=${encodeURIComponent(searchQuery)}`
+                : BASE_INTEREST_ENDPOINT;
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: interestAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const interestData = await response.json();
+
+            renderGroup(exploringList, interestData.filter(i => i.fields.category === 'exploring'), searchQuery);
+            renderGroup(funList, interestData.filter(i => i.fields.category === 'fun'), searchQuery);
+            displayPageSection({ showGrid: true });
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading interests:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    // Search + debouncing
+    function searchInterests() {
+        fetchInterests(searchInput.value.trim());
+    }
+
+    searchInput.addEventListener("input", function() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(function() {
+            searchInterests();
+        }, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    searchForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        searchInterests();
+    });
+
+    // Modal + tambah data via AJAX
+    function closeInterestModal() {
+        document.getElementById("add-interest-modal").hidePopover();
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function addInterest(event) {
+        event.preventDefault();
+
+        const submitButton = interestForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_INTEREST_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(interestForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                interestForm.reset();
+                closeInterestModal();
+                showToast('Success', 'New interest added successfully!', 'success');
+                fetchInterests(searchInput.value.trim());
+            } else {
+                const errorMessages = result.errors
+                    ? Object.values(result.errors).flat().map(error => error.message)
+                    : [result.message || `Something went wrong (status ${response.status}).`];
+                showToast('Failed to add interest', errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding interest:', error);
+            showToast('Failed to add interest', 'Cannot reach the server. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (interestForm) {
+        interestForm.addEventListener('submit', addInterest);
+    }
+
+    // Start application
+    fetchInterests(searchInput.value.trim());
+    </script>
 {% endblock content %}

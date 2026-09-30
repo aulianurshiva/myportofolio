@@ -10,7 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied        
 from main.forms import InterestForm, ExperienceForm
 from main.models import Experience, Interest
-
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST
 
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'No login session yet')
@@ -114,26 +115,39 @@ def delete_experience(request, experience_id):
 # === Buat interest ===
 def get_interest_json(request):
     name_query = request.GET.get("name", "").strip()
-    interests = Interest.objects.all()
+    interests = Interest.objects.prefetch_related("starred_by").order_by("id")
 
     if name_query:
         interests = interests.filter(name__icontains=name_query)
 
-    interest_json = serializers.serialize("json", interests, fields=("name", "category", "description"))
-    return HttpResponse(interest_json, content_type="application/json")
+    data = []
+    for interest in interests:
+        starred_users = interest.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(interest.id),
+            "fields": {
+                "name": interest.name,
+                "category": interest.category,
+                "description": interest.description,
+                "star_count": len(starred_users),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 def show_interest(request):
-    json_response = get_interest_json(request)
-    interests = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    interests = [entry.object for entry in interests]
     name_query = request.GET.get("name", "").strip()
 
     context = {
         "name": "Aulia Nur Shiva",
         "short_name": "Aulia",
-        "exploring_list": [i for i in interests if i.category == "exploring"],
-        "fun_list": [i for i in interests if i.category == "fun"],
         "name_query": name_query,
+        "form": InterestForm(),
     }
     return render(request, "interest.html", context)
 
@@ -169,6 +183,24 @@ def delete_interest(request, interest_id):
         return redirect("main:show_interest")
 
     return redirect("main:show_interest")
+
+@require_POST
+def create_interest_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Only the portfolio owner can add interests."},
+            status=403,
+        )
+
+    form = InterestForm(request.POST)
+    if form.is_valid():
+        interest = form.save()
+        return JsonResponse(
+            {"message": "Interest added successfully.", "pk": str(interest.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
 
 def register(request):
     form = UserCreationForm(request.POST or None)
