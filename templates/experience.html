@@ -22,6 +22,16 @@
                 {% for message in messages %}
                     <p class="form-message">{{ message }}</p>
                 {% endfor %}
+                <form id="experience-search-form" class="interest-search">
+                    <input type="search"
+                           id="search-input"
+                           name="title"
+                           value="{{ title_query }}"
+                           placeholder="Search by experience title"
+                           class="interest-search__input"
+                           aria-label="Search by experience title">
+                    <button type="submit" class="button">Search</button>
+                </form>
 
                 <div id="loading" class="empty-state hide">
                     <p>Loading experiences...</p>
@@ -32,7 +42,7 @@
                 </div>
 
                 <div id="empty" class="empty-state hide">
-                    <p>No experiences added yet.</p>
+                    <p id="empty-message">No experiences added yet.</p>
                 </div>
 
                 <div id="grid" class="experiences hide"></div>
@@ -49,12 +59,18 @@
     const STAR_URL_TEMPLATE = "{% url 'main:toggle_star_experience' '00000000-0000-0000-0000-000000000000' %}";
     const CAN_EDIT = "{{ can_edit|yesno:'true,false' }}" === "true";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let experienceAbortController;
+    let searchDebounceTimer;
 
     // Elemen DOM
     const loadingState = document.getElementById('loading');
     const errorState = document.getElementById('error');
     const emptyState = document.getElementById('empty');
     const gridContainer = document.getElementById('grid');
+    const emptyMessage = document.getElementById('empty-message');
+    const searchForm = document.getElementById('experience-search-form');
+    const searchInput = document.getElementById('search-input');
 
     function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
         loadingState.classList.toggle('hide', !showLoading);
@@ -168,12 +184,20 @@
         return wrapper;
     }
 
-    async function fetchExperiences() {
+    async function fetchExperiences(searchQuery = "") {
+        if (experienceAbortController) experienceAbortController.abort();
+        experienceAbortController = new AbortController();
+
         try {
             displayPageSection({ showLoading: true });
 
-            const response = await fetch(BASE_EXPERIENCE_ENDPOINT, {
+            const url = searchQuery
+                ? `${BASE_EXPERIENCE_ENDPOINT}?title=${encodeURIComponent(searchQuery)}`
+                : BASE_EXPERIENCE_ENDPOINT;
+
+            const response = await fetch(url, {
                 headers: { 'Accept': 'application/json' },
+                signal: experienceAbortController.signal,
             });
 
             if (!response.ok) throw new Error('Failed to fetch data');
@@ -181,6 +205,9 @@
             const experienceData = await response.json();
 
             if (experienceData.length === 0) {
+                emptyMessage.textContent = searchQuery
+                    ? 'No experiences found with that title.'
+                    : 'No experiences added yet.';
                 displayPageSection({ showEmpty: true });
             } else {
                 gridContainer.innerHTML = '';
@@ -190,12 +217,31 @@
                 displayPageSection({ showGrid: true });
             }
         } catch (error) {
+            if (error.name === 'AbortError') return;
             console.error('Error loading experiences:', error);
             displayPageSection({ showError: true });
         }
     }
 
+    // Search + debouncing
+    function searchExperiences() {
+        fetchExperiences(searchInput.value.trim());
+    }
+
+    searchInput.addEventListener("input", function() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(function() {
+            searchExperiences();
+        }, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    searchForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        searchExperiences();
+    });
+
     // Start application
-    fetchExperiences();
+    fetchExperiences(searchInput.value.trim());
     </script>
 {% endblock content %}

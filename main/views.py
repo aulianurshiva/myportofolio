@@ -31,10 +31,14 @@ def format_month(value):
     return timezone.localtime(value).strftime("%B %Y")
 
 def get_experience_json(request):
+    title_query = request.GET.get("title", "").strip()
     experiences = (
         Experience.objects.prefetch_related("starred_by")
         .order_by(F("ended_at").desc(nulls_first=True), "-started_at")
     )
+
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
 
     data = []
     for experience in experiences:
@@ -62,6 +66,7 @@ def show_experience(request):
     context = {
         "name": "Aulia Nur Shiva",
         "short_name": "Aulia",
+        "title_query": request.GET.get("title", "").strip(),
         "can_edit": can_edit(request.user),
     }
     return render(request, "experience.html", context)

@@ -221,6 +221,18 @@ class JsonApiTest(BaseTest):
         self.login_as(self.editor)
         fields = self.client.get(url).json()[0]["fields"]
         self.assertFalse(fields["is_starred"])
+
+    def test_experience_json_search(self):
+        Experience.objects.create(
+            title="Zebra Internship",
+            description="Stripes.",
+            started_at=timezone.now(),
+        )
+        url = reverse("main:get_experience_json")
+        results = self.client.get(url, {"title": "zebra"}).json()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["fields"]["title"], "Zebra Internship")
+        self.assertEqual(self.client.get(url, {"title": "tidak-ada"}).json(), [])
         
     def test_interest_json_star_fields(self):
         self.interest.starred_by.add(self.regular)
