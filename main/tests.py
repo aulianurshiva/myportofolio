@@ -103,24 +103,56 @@ class ExperienceAccessTest(BaseTest):
         self.assertEqual(self.client.post(self.delete_url).status_code, 302)
         self.assertFalse(Experience.objects.filter(id=self.experience.id).exists())
 
-    # --- flag peran di halaman (tombol kini dirender oleh JavaScript) ---
-    def test_role_flags_by_role(self):
+    def test_role_flags_and_modal_by_role(self):
         list_url = reverse("main:show_experience")
 
         response = self.client.get(list_url)  # anonim
         self.assertContains(response, 'const CAN_EDIT = "false"')
         self.assertContains(response, 'const IS_SUPERUSER = "false"')
+        self.assertNotContains(response, 'id="add-experience-modal"')
 
         self.login_as(self.editor)
         response = self.client.get(list_url)
         self.assertContains(response, 'const CAN_EDIT = "true"')
         self.assertContains(response, 'const IS_SUPERUSER = "false"')
+        self.assertNotContains(response, 'id="add-experience-modal"')
 
         self.login_as(self.owner)
         response = self.client.get(list_url)
         self.assertContains(response, 'const CAN_EDIT = "true"')
         self.assertContains(response, 'const IS_SUPERUSER = "true"')
+        self.assertContains(response, 'id="add-experience-modal"')
 
+class ExperienceAjaxTest(BaseTest):
+    def setUp(self):
+        super().setUp()
+        self.ajax_create_url = reverse("main:create_experience_ajax")
+
+    def test_create_requires_post(self):
+        self.login_as(self.owner)
+        self.assertEqual(self.client.get(self.ajax_create_url).status_code, 405)
+
+    def test_create_forbidden_for_non_owner(self):
+        for user in (None, self.regular, self.editor):
+            if user:
+                self.login_as(user)
+            response = self.client.post(self.ajax_create_url, EXPERIENCE_FORM)
+            self.assertEqual(response.status_code, 403)
+            self.assertIn("message", response.json())
+        self.assertFalse(Experience.objects.filter(title="New Role").exists())
+
+    def test_owner_creates_experience(self):
+        self.login_as(self.owner)
+        response = self.client.post(self.ajax_create_url, EXPERIENCE_FORM)
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Experience.objects.filter(pk=response.json()["pk"]).exists())
+
+    def test_invalid_input_returns_400(self):
+        self.login_as(self.owner)
+        response = self.client.post(self.ajax_create_url, dict(EXPERIENCE_FORM, title="   "))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("title", response.json()["errors"])
+        
 class StarTest(BaseTest):
     def test_toggle_star_experience(self):
         self.login_as(self.regular)
@@ -233,7 +265,7 @@ class JsonApiTest(BaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["fields"]["title"], "Zebra Internship")
         self.assertEqual(self.client.get(url, {"title": "tidak-ada"}).json(), [])
-        
+
     def test_interest_json_star_fields(self):
         self.interest.starred_by.add(self.regular)
         url = reverse("main:get_interest_json")

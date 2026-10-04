@@ -12,10 +12,12 @@
                         <h1>Experience</h1>
                     </div>
                     {% if user.is_superuser %}
-                    <a href="{% url 'main:create_experience' %}" class="button interest-add-button">
-                        <span aria-hidden="true">+</span>
-                        Add Experience
-                    </a>
+                        <button type="button"
+                                class="button interest-add-button"
+                                popovertarget="add-experience-modal">
+                            <span aria-hidden="true">+</span>
+                            Add Experience
+                        </button>
                     {% endif %}
                 </div>
 
@@ -50,10 +52,15 @@
         </section>
     </main>
 
+    {% if user.is_superuser %}
+        {% include "components/experience_form_modal.html" %}
+    {% endif %}
+
     <script>
     // Konfigurasi
     const DUMMY_ID = "00000000-0000-0000-0000-000000000000";
     const BASE_EXPERIENCE_ENDPOINT = "{% url 'main:get_experience_json' %}";
+    const CREATE_EXPERIENCE_ENDPOINT = "{% url 'main:create_experience_ajax' %}";
     const EDIT_URL_TEMPLATE = "{% url 'main:update_experience' '00000000-0000-0000-0000-000000000000' %}";
     const DELETE_URL_TEMPLATE = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}";
     const STAR_URL_TEMPLATE = "{% url 'main:toggle_star_experience' '00000000-0000-0000-0000-000000000000' %}";
@@ -71,6 +78,7 @@
     const emptyMessage = document.getElementById('empty-message');
     const searchForm = document.getElementById('experience-search-form');
     const searchInput = document.getElementById('search-input');
+    const experienceForm = document.getElementById('experience-form');
 
     function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
         loadingState.classList.toggle('hide', !showLoading);
@@ -240,6 +248,49 @@
         clearTimeout(searchDebounceTimer);
         searchExperiences();
     });
+    
+    // Modal + tambah data via AJAX
+    function closeExperienceModal() {
+        document.getElementById("add-experience-modal").hidePopover();
+    }
+
+    async function addExperience(event) {
+        event.preventDefault();
+
+        const submitButton = experienceForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_EXPERIENCE_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(experienceForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                experienceForm.reset();
+                closeExperienceModal();
+                showToast('Success', 'New experience added successfully!', 'success');
+                fetchExperiences(searchInput.value.trim());
+            } else {
+                const errorMessages = result.errors
+                    ? Object.values(result.errors).flat().map(error => error.message)
+                    : [result.message || `Something went wrong (status ${response.status}).`];
+                showToast('Failed to add experience', errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding experience:', error);
+            showToast('Failed to add experience', 'Cannot reach the server. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    // Modal hanya dirender untuk superuser, jadi form bisa null
+    if (experienceForm) {
+        experienceForm.addEventListener('submit', addExperience);
+    }
 
     // Start application
     fetchExperiences(searchInput.value.trim());
