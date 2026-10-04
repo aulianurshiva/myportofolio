@@ -85,16 +85,6 @@
         resultsContainer.classList.toggle('hide', !showGrid);
     }
 
-    // Mengubah karakter khusus HTML menjadi entity (anti XSS)
-    function escapeHtml(value) {
-        return String(value ?? '')
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#39;');
-    }
-
     function urlFor(template, id) {
         return template.replace('/0/', `/${id}/`);
     }
@@ -225,21 +215,6 @@
     // Modal + tambah data via AJAX
     function closeInterestModal() {
         document.getElementById("add-interest-modal").hidePopover();
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
     }
 
     async function addInterest(event) {

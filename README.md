@@ -57,3 +57,5 @@ Selain itu, saya juga menggunakan beberapa sumber maupun inspirasi lainnya yang 
 * https://stackoverflow.com/questions/29980211/whats-the-difference-between-migrate-and-makemigrations-in-django
 
 * https://youtu.be/I2-JYxnSiB0?si=uJRuREe1FSuhq_eN
+
+* https://coderwall.com/p/ostduq/escape-html-with-javascript
