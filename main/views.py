@@ -2,16 +2,15 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.core import serializers
 from django.db.models import F
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required 
 from django.core.exceptions import PermissionDenied        
 from main.forms import InterestForm, ExperienceForm
 from main.models import Experience, Interest
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'No login session yet')
@@ -28,32 +27,42 @@ def show_main(request):
     return render(request, "index.html", context)
 
 # === Buat experience ===
+def format_month(value):
+    return timezone.localtime(value).strftime("%B %Y")
+
 def get_experience_json(request):
-    experiences = Experience.objects.all()
-    experience_json = serializers.serialize(
-        "json", experiences,
-        fields=("title", "description", "thumbnail", "started_at", "ended_at"),
+    experiences = (
+        Experience.objects.prefetch_related("starred_by")
+        .order_by(F("ended_at").desc(nulls_first=True), "-started_at")
     )
-    return HttpResponse(experience_json, content_type="application/json")
+
+    data = []
+    for experience in experiences:
+        starred_users = list(experience.starred_by.all())
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+
+        data.append({
+            "pk": str(experience.id),
+            "fields": {
+                "title": experience.title,
+                "description": experience.description,
+                "thumbnail": experience.thumbnail or "",
+                "started_label": format_month(experience.started_at),
+                "ended_label": format_month(experience.ended_at) if experience.ended_at else "Present",
+                "is_ongoing": experience.is_ongoing,
+                "star_count": len(starred_users),
+                "is_starred": is_starred,
+                "starred_by_names": ", ".join(u.username for u in starred_users),
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 def show_experience(request):
-    json_response = get_experience_json(request)
-    entries = serializers.deserialize("json", json_response.content.decode("utf-8"))
-    experience_list = [entry.object for entry in entries]
-    experience_list.sort(
-        key=lambda e: (
-            e.ended_at is not None,
-            -(e.started_at.timestamp() if e.started_at else 0),
-        )
-    )
-
     context = {
         "name": "Aulia Nur Shiva",
         "short_name": "Aulia",
-        "experience_list": Experience.objects.all()
-            .order_by(F("ended_at").desc(nulls_first=True), "-started_at")
-            .prefetch_related("starred_by"),
-        "can_edit": can_edit(request.user),    
+        "can_edit": can_edit(request.user),
     }
     return render(request, "experience.html", context)
 

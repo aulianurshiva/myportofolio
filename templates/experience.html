@@ -23,41 +23,179 @@
                     <p class="form-message">{{ message }}</p>
                 {% endfor %}
 
-                <div class="experiences">
-                    {% for experience in experience_list %}
-                        <div class="experience-item">
-                            <details class="experience-card">
-                                <summary class="experience-summary">
-                                    <span class="experience-name">{{ experience.title }}</span>
-                                    <span class="experience-date">
-                                        {{ experience.started_at|date:"F Y" }} -
-                                        {% if experience.is_ongoing %}Present{% else %}{{ experience.ended_at|date:"F Y" }}{% endif %}
-                                    </span>
-                                </summary>
-                                <div class="experience-description">
-                                    <p>{{ experience.description }}</p>
-                                    {% if experience.thumbnail %}
-                                        <div class="experience-photo">
-                                            <img src="{{ experience.thumbnail }}" alt="{{ experience.title }}">
-                                        </div>
-                                    {% endif %}
-                                    <div class="experience-actions">
-                                        {% include "components/experience_star.html" with experience=experience %}
-                                        {% if can_edit %}
-                                            <a href="{% url 'main:update_experience' experience.id %}" class="button button button-small">Edit</a>
-                                        {% endif %}
-                                        {% if user.is_superuser %}
-                                            {% include "components/experience_delete_modal.html" with experience=experience %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </details>
-                        </div>
-                    {% empty %}
-                        <p class="empty-state">No experiences added yet.</p>
-                    {% endfor %}
+                <div id="loading" class="empty-state hide">
+                    <p>Loading experiences...</p>
                 </div>
+
+                <div id="error" class="empty-state hide">
+                    <p>Failed to load experiences. Please try again.</p>
+                </div>
+
+                <div id="empty" class="empty-state hide">
+                    <p>No experiences added yet.</p>
+                </div>
+
+                <div id="grid" class="experiences hide"></div>
             </div>
         </section>
     </main>
+
+    <script>
+    // Konfigurasi
+    const DUMMY_ID = "00000000-0000-0000-0000-000000000000";
+    const BASE_EXPERIENCE_ENDPOINT = "{% url 'main:get_experience_json' %}";
+    const EDIT_URL_TEMPLATE = "{% url 'main:update_experience' '00000000-0000-0000-0000-000000000000' %}";
+    const DELETE_URL_TEMPLATE = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}";
+    const STAR_URL_TEMPLATE = "{% url 'main:toggle_star_experience' '00000000-0000-0000-0000-000000000000' %}";
+    const CAN_EDIT = "{{ can_edit|yesno:'true,false' }}" === "true";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+
+    // Elemen DOM
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    function urlFor(template, id) {
+        return template.replace(DUMMY_ID, id);
+    }
+
+    function buildStarHtml(experience, id) {
+        const isStarredClass = experience.is_starred ? " is-starred" : "";
+        const starText = experience.is_starred ? "Unstar" : "Star";
+        const starTitle = experience.star_count > 0
+            ? `Starred by ${escapeHtml(experience.starred_by_names)}`
+            : "Be the first to give a star";
+
+        return `
+            <form method="post" action="${urlFor(STAR_URL_TEMPLATE, id)}" class="star-form">
+                {% csrf_token %}
+                <button type="submit"
+                        class="button button-star${isStarredClass}"
+                        title="${starTitle}">
+                    <span aria-hidden="true">★</span>
+                    ${starText}
+                    <span class="star-count">${experience.star_count}</span>
+                </button>
+            </form>`;
+    }
+
+    // Modal konfirmasi hapus (Popover API)
+    function buildDeleteHtml(id, safeTitle) {
+        if (!IS_SUPERUSER) return '';
+        const modalId = `delete-experience-${id}`;
+        return `
+            <button type="button"
+                    class="button button-secondary button-small"
+                    popovertarget="${modalId}"
+                    aria-label="Delete ${safeTitle}"
+                    title="Delete experience">
+                Delete
+            </button>
+            <div id="${modalId}"
+                 class="interest-delete-modal"
+                 popover="auto"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="delete-experience-title-${id}">
+                <button type="button"
+                        class="interest-delete-modal__backdrop"
+                        popovertarget="${modalId}"
+                        popovertargetaction="hide"
+                        aria-label="Close delete confirmation"></button>
+                <div class="interest-delete-modal__content">
+                    <button type="button"
+                            class="interest-delete-modal__close"
+                            popovertarget="${modalId}"
+                            popovertargetaction="hide"
+                            aria-label="Close delete confirmation">✖</button>
+                    <h2 id="delete-experience-title-${id}">Delete Experience?</h2>
+                    <p>Are you sure you want to delete <strong>${safeTitle}</strong>?</p>
+                    <div class="interest-delete-modal__actions">
+                        <button type="button"
+                                class="button"
+                                popovertarget="${modalId}"
+                                popovertargetaction="hide">Cancel</button>
+                        <form method="post" action="${urlFor(DELETE_URL_TEMPLATE, id)}">
+                            {% csrf_token %}
+                            <button type="submit" class="button button-secondary">Yes, Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function buildExperienceElement(item) {
+        const experience = item.fields;
+        const id = item.pk;
+        const safeTitle = escapeHtml(experience.title);
+
+        const photoHtml = experience.thumbnail
+            ? `<div class="experience-photo">
+                   <img src="${escapeHtml(experience.thumbnail)}" alt="${safeTitle}">
+               </div>`
+            : '';
+
+        const editHtml = CAN_EDIT
+            ? `<a href="${urlFor(EDIT_URL_TEMPLATE, id)}" class="button button-small">Edit</a>`
+            : '';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'experience-item';
+        wrapper.innerHTML = `
+            <details class="experience-card">
+                <summary class="experience-summary">
+                    <span class="experience-name">${safeTitle}</span>
+                    <span class="experience-date">${escapeHtml(experience.started_label)} - ${escapeHtml(experience.ended_label)}</span>
+                </summary>
+                <div class="experience-description">
+                    <p>${escapeHtml(experience.description)}</p>
+                    ${photoHtml}
+                    <div class="experience-actions">
+                        ${buildStarHtml(experience, id)}
+                        ${editHtml}
+                        ${buildDeleteHtml(id, safeTitle)}
+                    </div>
+                </div>
+            </details>`;
+        return wrapper;
+    }
+
+    async function fetchExperiences() {
+        try {
+            displayPageSection({ showLoading: true });
+
+            const response = await fetch(BASE_EXPERIENCE_ENDPOINT, {
+                headers: { 'Accept': 'application/json' },
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const experienceData = await response.json();
+
+            if (experienceData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                gridContainer.innerHTML = '';
+                experienceData.forEach(item => {
+                    gridContainer.appendChild(buildExperienceElement(item));
+                });
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            console.error('Error loading experiences:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    // Start application
+    fetchExperiences();
+    </script>
 {% endblock content %}

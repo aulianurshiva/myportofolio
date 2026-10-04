@@ -57,21 +57,6 @@ class MainTest(BaseTest):
         response = self.client.get(reverse("main:show_experience"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "experience.html")
-        self.assertContains(response, self.experience.title)
-        self.assertContains(response, "Present")
-
-    def test_empty_experience_page(self):
-        Experience.objects.all().delete()
-        response = self.client.get(reverse("main:show_experience"))
-        self.assertContains(response, "No experiences added yet.")
-
-    def test_completed_experience(self):
-        self.experience.ended_at = timezone.now()
-        self.experience.save()
-        response = self.client.get(reverse("main:show_experience"))
-        self.assertFalse(self.experience.is_ongoing)
-        self.assertNotContains(response, "Present")
-
 
 class ExperienceAccessTest(BaseTest):
     # --- pengunjung tanpa login: redirect ke login ---
@@ -118,27 +103,23 @@ class ExperienceAccessTest(BaseTest):
         self.assertEqual(self.client.post(self.delete_url).status_code, 302)
         self.assertFalse(Experience.objects.filter(id=self.experience.id).exists())
 
-    # --- tombol di template ---
-    def test_buttons_hidden_by_role(self):
+    # --- flag peran di halaman (tombol kini dirender oleh JavaScript) ---
+    def test_role_flags_by_role(self):
         list_url = reverse("main:show_experience")
 
         response = self.client.get(list_url)  # anonim
-        self.assertNotContains(response, self.create_url)
-        self.assertNotContains(response, self.update_url)
-        self.assertNotContains(response, self.delete_url)
+        self.assertContains(response, 'const CAN_EDIT = "false"')
+        self.assertContains(response, 'const IS_SUPERUSER = "false"')
 
         self.login_as(self.editor)
         response = self.client.get(list_url)
-        self.assertContains(response, self.update_url)
-        self.assertNotContains(response, self.create_url)
-        self.assertNotContains(response, self.delete_url)
+        self.assertContains(response, 'const CAN_EDIT = "true"')
+        self.assertContains(response, 'const IS_SUPERUSER = "false"')
 
         self.login_as(self.owner)
         response = self.client.get(list_url)
-        self.assertContains(response, self.create_url)
-        self.assertContains(response, self.update_url)
-        self.assertContains(response, self.delete_url)
-
+        self.assertContains(response, 'const CAN_EDIT = "true"')
+        self.assertContains(response, 'const IS_SUPERUSER = "true"')
 
 class StarTest(BaseTest):
     def test_toggle_star_experience(self):
@@ -204,14 +185,43 @@ class InterestTest(BaseTest):
 
 
 class JsonApiTest(BaseTest):
-    def test_experience_json_no_leak(self):
-        self.experience.starred_by.add(self.regular)
+    def test_experience_json_content(self):
         response = self.client.get(reverse("main:get_experience_json"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
-        self.assertNotContains(response, "starred_by")
-        self.assertNotContains(response, "regular")
+        fields = response.json()[0]["fields"]
+        self.assertEqual(fields["title"], self.experience.title)
+        self.assertTrue(fields["is_ongoing"])
+        self.assertEqual(fields["ended_label"], "Present")
 
+    def test_completed_experience_json(self):
+        self.experience.ended_at = timezone.now()
+        self.experience.save()
+        fields = self.client.get(reverse("main:get_experience_json")).json()[0]["fields"]
+        self.assertFalse(fields["is_ongoing"])
+        self.assertNotEqual(fields["ended_label"], "Present")
+
+    def test_empty_experience_json(self):
+        Experience.objects.all().delete()
+        response = self.client.get(reverse("main:get_experience_json"))
+        self.assertEqual(response.json(), [])
+
+    def test_experience_json_star_fields(self):
+        self.experience.starred_by.add(self.regular)
+        url = reverse("main:get_experience_json")
+
+        fields = self.client.get(url).json()[0]["fields"]  # anonim
+        self.assertEqual(fields["star_count"], 1)
+        self.assertFalse(fields["is_starred"])
+
+        self.login_as(self.regular)
+        fields = self.client.get(url).json()[0]["fields"]
+        self.assertTrue(fields["is_starred"])
+
+        self.login_as(self.editor)
+        fields = self.client.get(url).json()[0]["fields"]
+        self.assertFalse(fields["is_starred"])
+        
     def test_interest_json_star_fields(self):
         self.interest.starred_by.add(self.regular)
         url = reverse("main:get_interest_json")
