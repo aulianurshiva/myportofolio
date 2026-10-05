@@ -152,7 +152,31 @@ class ExperienceAjaxTest(BaseTest):
         response = self.client.post(self.ajax_create_url, dict(EXPERIENCE_FORM, title="   "))
         self.assertEqual(response.status_code, 400)
         self.assertIn("title", response.json()["errors"])
-        
+
+    def test_end_date_before_start_date_rejected(self):
+        self.login_as(self.owner)
+        data = dict(EXPERIENCE_FORM, ended_at="2025-01-01T00:00")
+        response = self.client.post(self.ajax_create_url, data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("ended_at", response.json()["errors"])
+
+    def test_xss_payload_rejected(self):
+        self.login_as(self.owner)
+        payload = '<img src="x" onerror="alert(\'XSS!\')">'
+        response = self.client.post(self.ajax_create_url, dict(EXPERIENCE_FORM, title=payload))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("title", response.json()["errors"])
+        self.assertFalse(Experience.objects.filter(description="Doing something new.").exists())
+
+    def test_html_tags_are_stripped(self):
+        self.login_as(self.owner)
+        data = dict(EXPERIENCE_FORM, title="<b>Bold</b> Role", description="Hello <i>world</i>")
+        response = self.client.post(self.ajax_create_url, data)
+        self.assertEqual(response.status_code, 201)
+        saved = Experience.objects.get(pk=response.json()["pk"])
+        self.assertEqual(saved.title, "Bold Role")
+        self.assertEqual(saved.description, "Hello world")
+    
 class StarTest(BaseTest):
     def test_toggle_star_experience(self):
         self.login_as(self.regular)

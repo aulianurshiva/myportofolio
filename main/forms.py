@@ -56,3 +56,23 @@ class ExperienceForm(ModelForm):
         self.fields["ended_at"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["thumbnail"].required = False
         self.fields["ended_at"].required = False
+
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Title cannot contain only HTML tags.")
+        return title
+
+    def clean_description(self):
+        description = strip_tags(self.cleaned_data["description"]).strip()
+        if not description:
+            raise ValidationError("Description cannot contain only HTML tags.")
+        return description
+
+    def clean(self):
+        cleaned_data = super().clean()
+        started_at = cleaned_data.get("started_at")
+        ended_at = cleaned_data.get("ended_at")
+        if started_at and ended_at and ended_at < started_at:
+            self.add_error("ended_at", "End date cannot be earlier than the start date.")
+        return cleaned_data
