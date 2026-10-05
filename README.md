@@ -29,9 +29,18 @@ Kelas: PBP A
 2. JSON lebih sering digunakan dalam pengembangan web modern karena formatnya lebih sederhana dibandingkan XML. Bentuk penulisannya juga cukup mudah dibaca dan dipahami, karena menggunakan pasangan key dan value. Selain itu, JSON juga lebih mudah digunakan oleh berbagai bahasa pemrograman dan sangat umum dipakai untuk komunikasi antara frontend dan backend. Jadi, untuk aplikasi web yang perlu sering bertukar data, JSON biasanya lebih praktis daripada XML
 
 3. Ketika kita mengakses URL untuk melihat data portofolio dalam bentuk JSON, request dari pengguna akan diteruskan dari urls.py ke fungsi view yang sesuai. Di dalam view tersebut, kita mengambil data portofolio dari database menggunakan model Django. Masalahnya, data yang diambil dari database masih berbentuk object atau queryset Django, sehingga belum bisa langsung dikembalikan sebagai JSON. Karena itu, kita melakukan serialization, yaitu mengubah data tersebut ke bentuk yang lebih umum seperti dictionary atau list yang bisa direpresentasikan dalam JSON. Setelah proses tersebut selesai, data yang sudah berbentuk teks JSON dikembalikan melalui HttpResponse dengan content_type diatur ke application/json, sehingga data portofolio bisa ditampilkan dalam format JSON dan juga dapat dibaca oleh aplikasi atau frontend lain
+
+
+### Tugas 5
+
+1. Debouncing adalah teknik untuk memberi jeda sebelum fungsi dijalankan sampai pengguna berhenti melakukan input selama waktu tertentu. Teknik ini penting pada fitur pencarian yang menggunakan AJAX karena kalau tidak menggunakan debouncing, setiap kali pengguna mengetik satu karakter akan langsung dikirim request ke server. Dengan debouncing, request yang dikirim jadi lebih sedikit sehingga server tidak terlalu terbebani dan pencarian juga menjadi lebih efisien.
+
+2. await digunakan untuk menunggu proses fetch() sampai selesai sebelum kode berikutnya dijalankan. Dengan begitu, response dari server sudah tersedia ketika ingin diproses. Kalau tidak menggunakan await, fetch() akan langsung mengembalikan Promise, sehingga kode berikutnya bisa dijalankan sebelum data dari server selesai diterima. Akibatnya, data yang ingin digunakan bisa saja belum tersedia saat kode tersebut dijalankan.
+
+3. XSS (Cross-Site Scripting) adalah serangan dengan cara menyisipkan script berbahaya ke dalam halaman web yang kemudian dapat dijalankan di browser pengguna. Data yang ditampilkan melalui AJAX/JavaScript lebih rentan kalau data dari server langsung dimasukkan ke HTML tanpa proses yang aman, misalnya menggunakan innerHTML. Hal ini berbeda dengan template Django yang secara default melakukan escaping terhadap data yang ditampilkan, sehingga karakter tertentu tidak langsung dianggap sebagai kode HTML atau JavaScript. Karena itu, saat menampilkan data melalui AJAX/JavaScript, kita perlu lebih berhati-hati dalam mengolah dan memasukkan data ke halaman.
 ---------------------------------------------------------------------------------------
 
-Saya juga menggunakan bantuan gen AI dalam proses pengerjaan tugas, terutama untuk memahami tugas dan mencari solusi ketika mengalami kendala. Berikut tautan chatnya: https://share.gemini.google/umQBon3eQHb5 (akan selalu menggunakan room chat yang sama)
+Saya juga menggunakan bantuan gen AI dalam proses pengerjaan tugas, terutama untuk memahami tugas dan mencari solusi ketika mengalami kendala. Berikut tautan chatnya: https://share.gemini.google/Fi90iPbW1lme (akan selalu menggunakan room chat yang sama)
 
 
 Selain itu, saya juga menggunakan beberapa sumber maupun inspirasi lainnya yang saya cantumkan pada tautan berikut:
@@ -59,3 +68,11 @@ Selain itu, saya juga menggunakan beberapa sumber maupun inspirasi lainnya yang 
 * https://youtu.be/I2-JYxnSiB0?si=uJRuREe1FSuhq_eN
 
 * https://coderwall.com/p/ostduq/escape-html-with-javascript
+
+* https://developer.mozilla.org/en-US/docs/Glossary/Debounce
+
+* https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Promises
+
+* https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet
+
+* https://docs.djangoproject.com/en/6.0/topics/security/ 
