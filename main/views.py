@@ -145,6 +145,22 @@ def delete_experience(request, experience_id):
 
     return redirect("main:show_experience")
 
+@require_POST
+def delete_experience_ajax(request, experience_id):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Only the portfolio owner can delete experiences."},
+            status=403,
+        )
+
+    try:
+        experience = Experience.objects.get(pk=experience_id)
+    except Experience.DoesNotExist:
+        return JsonResponse({"message": "Experience not found."}, status=404)
+
+    experience.delete()
+    return JsonResponse({"message": "Experience deleted successfully."})
+
 # === Buat interest ===
 def get_interest_json(request):
     name_query = request.GET.get("name", "").strip()

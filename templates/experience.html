@@ -62,7 +62,7 @@
     const BASE_EXPERIENCE_ENDPOINT = "{% url 'main:get_experience_json' %}";
     const CREATE_EXPERIENCE_ENDPOINT = "{% url 'main:create_experience_ajax' %}";
     const EDIT_URL_TEMPLATE = "{% url 'main:update_experience' '00000000-0000-0000-0000-000000000000' %}";
-    const DELETE_URL_TEMPLATE = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}";
+    const DELETE_URL_TEMPLATE = "{% url 'main:delete_experience_ajax' '00000000-0000-0000-0000-000000000000' %}";
     const STAR_URL_TEMPLATE = "{% url 'main:toggle_star_experience' '00000000-0000-0000-0000-000000000000' %}";
     const CAN_EDIT = "{{ can_edit|yesno:'true,false' }}" === "true";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
@@ -147,8 +147,7 @@
                                 class="button"
                                 popovertarget="${modalId}"
                                 popovertargetaction="hide">Cancel</button>
-                        <form method="post" action="${urlFor(DELETE_URL_TEMPLATE, id)}">
-                            {% csrf_token %}
+                        <form method="post" action="${urlFor(DELETE_URL_TEMPLATE, id)}" class="delete-form">
                             <button type="submit" class="button button-secondary">Yes, Delete</button>
                         </form>
                     </div>
@@ -291,6 +290,32 @@
     if (experienceForm) {
         experienceForm.addEventListener('submit', addExperience);
     }
+
+    // Hapus experience via AJAX (event delegation karena kartu dibuat dinamis)
+    gridContainer.addEventListener('submit', async function(event) {
+        const form = event.target.closest('.delete-form');
+        if (!form) return;
+        event.preventDefault();
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                showToast('Success', 'Experience deleted successfully!', 'success');
+                fetchExperiences(searchInput.value.trim());
+            } else {
+                showToast('Failed to delete experience',
+                          result.message || `Something went wrong (status ${response.status}).`, 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting experience:', error);
+            showToast('Failed to delete experience', 'Cannot reach the server. Please try again.', 'error');
+        }
+    });
 
     // Start application
     fetchExperiences(searchInput.value.trim());
