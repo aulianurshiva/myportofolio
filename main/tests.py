@@ -115,7 +115,7 @@ class ExperienceAccessTest(BaseTest):
         response = self.client.get(list_url)
         self.assertContains(response, 'const CAN_EDIT = "true"')
         self.assertContains(response, 'const IS_SUPERUSER = "false"')
-        self.assertNotContains(response, 'id="add-experience-modal"')
+        self.assertContains(response, 'id="add-experience-modal"')
 
         self.login_as(self.owner)
         response = self.client.get(list_url)
