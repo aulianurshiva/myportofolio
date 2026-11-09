@@ -38,6 +38,16 @@ Kelas: PBP A
 2. await digunakan untuk menunggu proses fetch() sampai selesai sebelum kode berikutnya dijalankan. Dengan begitu, response dari server sudah tersedia ketika ingin diproses. Kalau tidak menggunakan await, fetch() akan langsung mengembalikan Promise, sehingga kode berikutnya bisa dijalankan sebelum data dari server selesai diterima. Akibatnya, data yang ingin digunakan bisa saja belum tersedia saat kode tersebut dijalankan.
 
 3. XSS (Cross-Site Scripting) adalah serangan dengan cara menyisipkan script berbahaya ke dalam halaman web yang kemudian dapat dijalankan di browser pengguna. Data yang ditampilkan melalui AJAX/JavaScript lebih rentan kalau data dari server langsung dimasukkan ke HTML tanpa proses yang aman, misalnya menggunakan innerHTML. Hal ini berbeda dengan template Django yang secara default melakukan escaping terhadap data yang ditampilkan, sehingga karakter tertentu tidak langsung dianggap sebagai kode HTML atau JavaScript. Karena itu, saat menampilkan data melalui AJAX/JavaScript, kita perlu lebih berhati-hati dalam mengolah dan memasukkan data ke halaman.
+
+### Tugas 6
+
+1. REST (*Representational State Transfer*) adalah pendekatan arsitektur API yang menggunakan resource dan HTTP method untuk mengatur komunikasi antara client dan server. Mengembalikan JSON saja belum cukup disebut RESTful karena API juga harus mengikuti prinsip REST, seperti penggunaan URL untuk resource dan HTTP method yang sesuai. `PUT` digunakan untuk mengganti keseluruhan data, sedangkan `PATCH` digunakan untuk memperbarui sebagian data. Contohnya, `PUT` untuk mengganti seluruh informasi Experience dan `PATCH` untuk mengubah judulnya saja.
+
+2. Serializer pada Django REST Framework berfungsi mengubah objek Django menjadi format JSON dan sebaliknya, sekaligus melakukan validasi data yang diterima dari client. Dibandingkan membuat dictionary secara manual menggunakan `JsonResponse`, serializer lebih praktis karena proses konversi dan validasi data sudah ditangani secara terstruktur sehingga kode lebih konsisten dan mudah dikembangkan.
+
+3. Autentikasi adalah proses memverifikasi identitas pengguna, sedangkan otorisasi adalah proses menentukan hak akses pengguna terhadap suatu tindakan. Hak akses perlu diperiksa menggunakan *permission class* di server karena menyembunyikan tombol pada template hanya membatasi tampilan, bukan akses sebenarnya. Pengguna masih bisa mengirim request langsung ke API, sehingga server tetap harus memeriksa izin sebelum menjalankan operasi.
+
+4. Pada `SessionAuthentication`, browser mengirimkan cookie session secara otomatis sehingga request yang mengubah data tetap memerlukan token CSRF untuk mencegah request tidak sah dari situs lain. Sementara itu, `force_authenticate` hanya menetapkan pengguna sebagai pengguna terautentikasi tanpa menjalankan proses autentikasi normal, sehingga tidak cukup untuk membuktikan perlindungan CSRF berjalan. Pengujian CSRF perlu menggunakan session authentication dengan pemeriksaan CSRF yang diaktifkan, misalnya `Client(enforce_csrf_checks=True)`.
 ---------------------------------------------------------------------------------------
 
 Saya juga menggunakan bantuan gen AI dalam proses pengerjaan tugas, terutama untuk memahami tugas dan mencari solusi ketika mengalami kendala. Berikut tautan chatnya: https://share.gemini.google/Fi90iPbW1lme (akan selalu menggunakan room chat yang sama)
@@ -76,3 +86,7 @@ Selain itu, saya juga menggunakan beberapa sumber maupun inspirasi lainnya yang 
 * https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet
 
 * https://docs.djangoproject.com/en/6.0/topics/security/ 
+
+* https://kodekloud.com/blog/put-and-patch-in-rest-api/
+
+* https://www.django-rest-framework.org/api-guide/serializers/
