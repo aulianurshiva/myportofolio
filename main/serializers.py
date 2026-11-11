@@ -44,7 +44,7 @@ class InterestSerializer(serializers.ModelSerializer):
         if request is None or not request.user.is_authenticated:
             return False
 
-        return obj.starred_by.filter(pk=request.user.pk).exists()
+        return any(u.pk == request.user.pk for u in obj.starred_by.all())
 
     def get_starred_by_names(self, obj):
         return ", ".join(
@@ -105,7 +105,7 @@ class ExperienceSerializer(serializers.ModelSerializer):
         if request is None or not request.user.is_authenticated:
             return False
 
-        return obj.starred_by.filter(pk=request.user.pk).exists()
+        return any(u.pk == request.user.pk for u in obj.starred_by.all())
 
     def validate(self, attrs):
         started_at = attrs.get(
