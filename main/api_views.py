@@ -1,10 +1,8 @@
 from django.shortcuts import get_object_or_404
 
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import (
     api_view,
-    authentication_classes,
     permission_classes,
 )
 from rest_framework.permissions import IsAuthenticated
@@ -16,7 +14,6 @@ from main.serializers import InterestSerializer, ExperienceSerializer
 
 
 @api_view(["GET", "HEAD", "POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def interest_list(request):
     if request.method in ("GET", "HEAD"):
@@ -54,7 +51,6 @@ def interest_list(request):
 
 
 @api_view(["GET", "HEAD", "PUT", "PATCH", "DELETE"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def interest_detail(request, interest_id):
     interest = get_object_or_404(
@@ -91,7 +87,6 @@ def interest_detail(request, interest_id):
 
 
 @api_view(["POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def interest_star(request, interest_id):
     interest = get_object_or_404(
@@ -112,7 +107,6 @@ def interest_star(request, interest_id):
     return Response(serializer.data)
 
 @api_view(["GET", "HEAD", "POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def experience_list(request):
     if request.method in ("GET", "HEAD"):
@@ -152,7 +146,6 @@ def experience_list(request):
 
 
 @api_view(["GET", "HEAD", "PUT", "PATCH", "DELETE"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def experience_detail(request, experience_id):
     experience = get_object_or_404(
@@ -189,7 +182,6 @@ def experience_detail(request, experience_id):
 
 
 @api_view(["POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def experience_star(request, experience_id):
     experience = get_object_or_404(
@@ -208,3 +200,12 @@ def experience_star(request, experience_id):
     )
 
     return Response(serializer.data)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def api_logout(request):
+    # request.auth berisi objek Token kalau login pakai token (None kalau via session)
+    if request.auth is not None:
+        request.auth.delete()
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
