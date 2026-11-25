@@ -116,6 +116,14 @@ class InterestAPITest(APITestCase):
         for user in (None, self.visitor):
             self.client.force_authenticate(user=user)
 
+            # Tamu dibalas 401 karena TokenAuthentication berada di urutan
+            # pertama; visitor yang sudah login tetap dibalas 403.
+            expected_status = (
+                status.HTTP_401_UNAUTHORIZED
+                if user is None
+                else status.HTTP_403_FORBIDDEN
+            )
+
             response = self.client.post(
                 self.list_url,
                 self.payload,
@@ -124,7 +132,7 @@ class InterestAPITest(APITestCase):
 
             self.assertEqual(
                 response.status_code,
-                status.HTTP_403_FORBIDDEN,
+                expected_status,
             )
 
             response = self.client.patch(
@@ -135,14 +143,14 @@ class InterestAPITest(APITestCase):
 
             self.assertEqual(
                 response.status_code,
-                status.HTTP_403_FORBIDDEN,
+                expected_status,
             )
 
             response = self.client.delete(self.detail_url)
 
             self.assertEqual(
                 response.status_code,
-                status.HTTP_403_FORBIDDEN,
+                expected_status,
             )
 
         self.assertEqual(Interest.objects.count(), 1)
@@ -259,9 +267,10 @@ class InterestAPITest(APITestCase):
     def test_star_requires_login_and_toggles(self):
         response = self.client.post(self.star_url)
 
+        # Tamu dibalas 401 karena TokenAuthentication berada di urutan pertama.
         self.assertEqual(
             response.status_code,
-            status.HTTP_403_FORBIDDEN,
+            status.HTTP_401_UNAUTHORIZED,
         )
 
         self.client.force_authenticate(user=self.visitor)
@@ -510,6 +519,14 @@ class ExperienceAPITest(APITestCase):
         for user in (None, self.visitor):
             self.client.force_authenticate(user=user)
 
+            # Tamu dibalas 401 karena TokenAuthentication berada di urutan
+            # pertama; visitor yang sudah login tetap dibalas 403.
+            expected_status = (
+                status.HTTP_401_UNAUTHORIZED
+                if user is None
+                else status.HTTP_403_FORBIDDEN
+            )
+
             response = self.client.post(
                 self.list_url,
                 self.payload,
@@ -518,7 +535,7 @@ class ExperienceAPITest(APITestCase):
 
             self.assertEqual(
                 response.status_code,
-                status.HTTP_403_FORBIDDEN,
+                expected_status,
             )
 
             response = self.client.patch(
@@ -529,14 +546,14 @@ class ExperienceAPITest(APITestCase):
 
             self.assertEqual(
                 response.status_code,
-                status.HTTP_403_FORBIDDEN,
+                expected_status,
             )
 
             response = self.client.delete(self.detail_url)
 
             self.assertEqual(
                 response.status_code,
-                status.HTTP_403_FORBIDDEN,
+                expected_status,
             )
 
         self.experience.refresh_from_db()
@@ -735,9 +752,10 @@ class ExperienceAPITest(APITestCase):
     def test_star_requires_login_and_toggles(self):
         response = self.client.post(self.star_url)
 
+        # Tamu dibalas 401 karena TokenAuthentication berada di urutan pertama.
         self.assertEqual(
             response.status_code,
-            status.HTTP_403_FORBIDDEN,
+            status.HTTP_401_UNAUTHORIZED,
         )
 
         self.client.force_authenticate(user=self.visitor)
